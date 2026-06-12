@@ -17,7 +17,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const post = await getPostById(id)
   if (!post) return { title: 'Post not found' }
-  return { title: post.title, description: post.body.slice(0, 160) }
+  const description = post.body.slice(0, 160)
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: `https://baile.fyi/feed/${id}` },
+    openGraph: {
+      title: post.title,
+      description,
+      type: 'article',
+      publishedTime: post.created_at,
+      url: `https://baile.fyi/feed/${id}`,
+      ...(post.image_url ? { images: [{ url: post.image_url, alt: post.title }] } : {}),
+    },
+    twitter: { card: post.image_url ? 'summary_large_image' : 'summary', title: post.title, description },
+  }
 }
 
 export default async function PostPage({ params }: Props) {

@@ -9,7 +9,11 @@ import { formatDistanceToNow } from 'date-fns'
 import type { Metadata } from 'next'
 import type { HelpType } from '@/types'
 
-export const metadata: Metadata = { title: 'Neighbour Help Board' }
+export const metadata: Metadata = {
+  title: 'Neighbour Help Board',
+  description: 'Ask for help or offer support to your neighbours in Kilcock, Co. Kildare.',
+  alternates: { canonical: 'https://baile.fyi/help' },
+}
 export const revalidate = 60
 
 interface Props { searchParams: Promise<{ type?: string }> }

@@ -5,7 +5,11 @@ import EventCard from '@/components/events/EventCard'
 import { getUpcomingEvents } from '@/actions/events'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Events' }
+export const metadata: Metadata = {
+  title: 'Events',
+  description: 'Upcoming events in Kilcock, Co. Kildare — community gatherings, markets, sports, and more.',
+  alternates: { canonical: 'https://baile.fyi/events' },
+}
 export const revalidate = 60
 
 export default async function EventsPage() {

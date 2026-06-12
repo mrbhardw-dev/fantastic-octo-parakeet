@@ -7,7 +7,11 @@ import { POST_CATEGORIES } from '@/types'
 import type { Metadata } from 'next'
 import type { PostCategory } from '@/types'
 
-export const metadata: Metadata = { title: 'Local Feed' }
+export const metadata: Metadata = {
+  title: 'Local Feed',
+  description: 'Latest updates, alerts, recommendations, and news from the Kilcock community in Co. Kildare.',
+  alternates: { canonical: 'https://baile.fyi/feed' },
+}
 export const revalidate = 60
 
 interface Props {

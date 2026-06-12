@@ -7,7 +7,11 @@ import { DIRECTORY_CATEGORIES } from '@/types'
 import type { Metadata } from 'next'
 import type { DirectoryCategory } from '@/types'
 
-export const metadata: Metadata = { title: 'Local Directory' }
+export const metadata: Metadata = {
+  title: 'Local Directory',
+  description: 'Browse local businesses, tradespeople, clubs, and community groups in Kilcock, Co. Kildare.',
+  alternates: { canonical: 'https://baile.fyi/directory' },
+}
 export const revalidate = 300
 
 interface Props { searchParams: Promise<{ category?: string }> }
