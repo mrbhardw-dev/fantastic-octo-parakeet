@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import WeatherWidget from '@/components/weather/WeatherWidget'
 import {
   Rss,
   CalendarDays,
@@ -19,9 +20,12 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/8 via-secondary/30 to-background py-20 px-4 sm:py-28">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
             <MapPin size={14} aria-hidden="true" />
             Now in Kilcock, Co. Kildare
+          </div>
+          <div className="mb-6 flex justify-center">
+            <WeatherWidget />
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             Your town,<br />
