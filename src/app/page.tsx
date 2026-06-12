@@ -21,7 +21,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
             <MapPin size={14} aria-hidden="true" />
-            Kilcock, Co. Kildare — Phase 1
+            Now in Kilcock, Co. Kildare
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             Your town,<br />
@@ -170,8 +170,8 @@ const trust = [
   },
   {
     icon: MapPin,
-    title: 'Kilcock-focused',
-    description: 'Built specifically for Kilcock, Co. Kildare. More Irish towns coming soon.',
+    title: 'Built for your area',
+    description: 'Each community gets its own noticeboard. Starting with Kilcock — more Irish towns joining soon.',
   },
   {
     icon: Users,
