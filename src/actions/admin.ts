@@ -256,6 +256,58 @@ export async function moderateListing(
   return { success: true }
 }
 
+export async function postQuickAlert(
+  title: string,
+  body: string,
+): Promise<ModerateResult> {
+  const moderator = await requireModerator()
+
+  // Only admins can post quick alerts
+  if (moderator.role !== 'admin') {
+    return { success: false, error: 'Only admins can post quick alerts.' }
+  }
+
+  const { data: post, error: insertErr } = await supabase
+    .from('posts')
+    .insert({
+      title,
+      body,
+      category: 'Alert',
+      town: 'Kilcock',
+      county: 'Kildare',
+      status: 'approved',
+      created_by: moderator.id,
+    })
+    .select('id, title, category, town, county, created_at')
+    .single()
+
+  if (insertErr || !post) return { success: false, error: 'Failed to create alert.' }
+
+  try {
+    const streamId = await addPostActivity({
+      postId: post.id,
+      profileId: moderator.id,
+      title: post.title,
+      category: post.category,
+      town: post.town,
+    })
+    await supabase.from('posts').update({ stream_activity_id: streamId }).eq('id', post.id)
+    await indexPost({
+      id: post.id,
+      title: post.title,
+      body,
+      category: post.category,
+      town: post.town,
+      county: post.county,
+      created_at: post.created_at,
+    })
+  } catch { /* non-fatal */ }
+
+  revalidatePath('/admin')
+  revalidatePath('/feed')
+  return { success: true }
+}
+
 export async function moderateHelpPost(
   helpPostId: string,
   status: ApproveOrReject,

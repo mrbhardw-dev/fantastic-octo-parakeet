@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
+import { getOrCreateProfileId } from '@/lib/profile'
 import type { DirectoryListing, DirectoryCategory } from '@/types'
 
 const ListingSchema = z.object({
@@ -37,13 +38,8 @@ export async function createDirectoryListing(formData: FormData) {
     return { error: parsed.error.issues[0].message }
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('clerk_user_id', userId)
-    .single()
-
-  if (!profile) return { error: 'Profile not found.' }
+  const profileId = await getOrCreateProfileId(userId)
+  if (!profileId) return { error: 'Could not resolve your profile. Please try signing out and back in.' }
 
   const { error } = await supabase.from('directory_listings').insert({
     name: parsed.data.name,
@@ -55,7 +51,7 @@ export async function createDirectoryListing(formData: FormData) {
     town: 'Kilcock',
     county: 'Kildare',
     status: 'pending',
-    created_by: profile.id,
+    created_by: profileId,
   })
 
   if (error) return { error: 'Failed to create listing. Please try again.' }

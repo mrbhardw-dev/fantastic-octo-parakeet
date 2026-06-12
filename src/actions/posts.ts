@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
+import { getOrCreateProfileId } from '@/lib/profile'
 import type { Post, PostCategory } from '@/types'
 
 const PostSchema = z.object({
@@ -30,16 +31,8 @@ export async function createPost(formData: FormData) {
     return { error: parsed.error.issues[0].message }
   }
 
-  // Resolve profile from Clerk user
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('clerk_user_id', userId)
-    .single()
-
-  if (profileError || !profile) {
-    return { error: 'Profile not found. Please try signing out and back in.' }
-  }
+  const profileId = await getOrCreateProfileId(userId)
+  if (!profileId) return { error: 'Could not resolve your profile. Please try signing out and back in.' }
 
   const { error } = await supabase.from('posts').insert({
     title: parsed.data.title,
@@ -49,7 +42,7 @@ export async function createPost(formData: FormData) {
     town: 'Kilcock',
     county: 'Kildare',
     status: 'pending',
-    created_by: profile.id,
+    created_by: profileId,
   })
 
   if (error) return { error: 'Failed to create post. Please try again.' }

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getPendingCounts } from '@/actions/admin'
 import { Card, CardContent } from '@/components/ui/card'
+import { QuickAlertButton } from '@/components/admin/QuickAlertButton'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Admin Dashboard' }
@@ -18,7 +19,10 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Pending review</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Pending review</h2>
+        <QuickAlertButton />
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {sections.map((s) => (
           <Link key={s.href} href={s.href} className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
