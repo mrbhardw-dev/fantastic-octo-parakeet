@@ -1,0 +1,110 @@
+'use server'
+
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+import { supabase } from '@/lib/supabase'
+import type { Event } from '@/types'
+
+const EventSchema = z.object({
+  title: z.string().min(3).max(200),
+  description: z.string().max(2000).optional(),
+  starts_at: z.string().datetime(),
+  ends_at: z.string().datetime().optional().or(z.literal('')),
+  venue_name: z.string().max(200).optional(),
+  source_url: z.string().url().optional().or(z.literal('')),
+})
+
+export async function createEvent(formData: FormData) {
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+
+  const raw = {
+    title: formData.get('title') as string,
+    description: formData.get('description') as string || undefined,
+    starts_at: formData.get('starts_at') as string,
+    ends_at: formData.get('ends_at') as string || undefined,
+    venue_name: formData.get('venue_name') as string || undefined,
+    source_url: formData.get('source_url') as string || undefined,
+  }
+
+  const parsed = EventSchema.safeParse(raw)
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('clerk_user_id', userId)
+    .single()
+
+  if (!profile) return { error: 'Profile not found.' }
+
+  const { error } = await supabase.from('events').insert({
+    title: parsed.data.title,
+    description: parsed.data.description || null,
+    starts_at: parsed.data.starts_at,
+    ends_at: parsed.data.ends_at || null,
+    venue_name: parsed.data.venue_name || null,
+    source_url: parsed.data.source_url || null,
+    town: 'Kilcock',
+    county: 'Kildare',
+    status: 'pending',
+    created_by: profile.id,
+  })
+
+  if (error) return { error: 'Failed to create event. Please try again.' }
+
+  revalidatePath('/events')
+  return { success: true }
+}
+
+export async function getUpcomingEvents(limit = 20): Promise<Event[]> {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*, profiles(display_name)')
+    .eq('status', 'approved')
+    .gte('starts_at', new Date().toISOString())
+    .order('starts_at', { ascending: true })
+    .limit(limit)
+
+  if (error) return []
+  return (data ?? []) as unknown as Event[]
+}
+
+export async function getEventById(id: string): Promise<Event | null> {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*, profiles(display_name)')
+    .eq('id', id)
+    .eq('status', 'approved')
+    .single()
+
+  if (error) return null
+  return data as unknown as Event
+}
+
+export async function reportEvent(eventId: string, reason: string) {
+  const { userId } = await auth()
+  if (!userId) return { error: 'You must be signed in to report content.' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('clerk_user_id', userId)
+    .single()
+
+  if (!profile) return { error: 'Profile not found.' }
+
+  const { error } = await supabase.from('reports').insert({
+    reporter_id: profile.id,
+    content_type: 'event',
+    content_id: eventId,
+    reason,
+  })
+
+  if (error) return { error: 'Failed to submit report.' }
+  return { success: true }
+}
