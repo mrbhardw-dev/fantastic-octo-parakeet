@@ -44,8 +44,11 @@ export default function Footer() {
                 baile<span className="text-primary">.fyi</span>
               </span>
             </Link>
-            <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-[200px]">
-              Kilcock&rsquo;s community noticeboard. For residents, by residents.
+            <p className="mt-3 text-xs text-muted-foreground/60 font-medium tracking-widest uppercase">
+              baile /bal-uh/ · Irish for home
+            </p>
+            <p className="mt-2 text-sm font-semibold text-foreground leading-snug">
+              Your home town.<br />Your home page.
             </p>
             <p className="mt-2 text-xs text-muted-foreground">Kilcock, Co. Kildare, Ireland</p>
           </div>

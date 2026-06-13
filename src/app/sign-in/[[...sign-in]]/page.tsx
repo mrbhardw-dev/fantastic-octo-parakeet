@@ -29,7 +29,10 @@ export default function SignInPage() {
             </span>
           </Link>
 
-          <h1 className="text-2xl font-bold mb-3 leading-snug">Welcome back</h1>
+          <p className="text-primary-foreground/50 text-[10px] font-medium tracking-[0.2em] uppercase mb-3">
+            tar abhaile · come home
+          </p>
+          <h1 className="text-2xl font-bold mb-3 leading-snug">Welcome back home</h1>
           <p className="text-primary-foreground/80 text-sm leading-relaxed mb-8">
             Sign in to post updates, add events, and connect with the people of Kilcock, Co. Kildare.
           </p>

@@ -47,17 +47,20 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
 
         <div className="relative mx-auto max-w-3xl text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
             <MapPin size={14} aria-hidden="true" />
-            Now serving Kilcock, Co. Kildare
+            Kilcock, Co. Kildare
           </div>
+          <p className="text-xs text-primary/60 font-medium tracking-[0.2em] uppercase mb-5">
+            baile /bal-uh/ · Irish for home, place &amp; belonging
+          </p>
           <div className="mb-7 flex justify-center">
             <WeatherWidget />
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-[1.1]">
-            Your town,<br />
+            Your home town.<br />
             <span className="relative text-primary">
-              your community
+              Your home page.
               <span
                 className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-primary/30"
                 aria-hidden="true"
@@ -65,8 +68,8 @@ export default async function HomePage() {
             </span>
           </h1>
           <p className="mt-7 text-lg leading-relaxed text-muted-foreground max-w-xl mx-auto">
-            baile.fyi is Kilcock&rsquo;s local community noticeboard — a place for residents,
-            businesses, clubs, and neighbours to share what matters in your town.
+            The community noticeboard for Kilcock — a shared home page for residents,
+            businesses, clubs, and neighbours to share what matters on your doorstep.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link href="/feed">
@@ -235,10 +238,13 @@ export default async function HomePage() {
       {/* Join CTA */}
       <section className="py-20 px-4 bg-primary text-primary-foreground">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold mb-4">Join your community today</h2>
+          <p className="text-primary-foreground/50 text-xs font-medium tracking-[0.2em] uppercase mb-3">
+            tar abhaile · come home
+          </p>
+          <h2 className="text-3xl font-bold mb-4">Come home to your community</h2>
           <p className="text-primary-foreground/80 text-lg mb-8 leading-relaxed">
             It&rsquo;s free to join. Sign up to post updates, add events, and connect
-            with the people of Kilcock.
+            with the people of Kilcock — your home page is waiting.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/sign-up">

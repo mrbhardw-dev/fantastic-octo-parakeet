@@ -34,12 +34,15 @@ export default async function SignUpPage() {
             </span>
           </Link>
 
+          <p className="text-primary-foreground/50 text-[10px] font-medium tracking-[0.2em] uppercase mb-3">
+            tar abhaile · come home
+          </p>
           <h1 className="text-2xl font-bold mb-3 leading-snug">
-            Join Kilcock&rsquo;s community noticeboard
+            Your home town.<br />Your home page.
           </h1>
           <p className="text-primary-foreground/80 text-sm leading-relaxed mb-8">
-            Free to join. Connect with residents, discover local events,
-            and share what matters in Kilcock, Co. Kildare.
+            Join Kilcock&rsquo;s free community noticeboard — share updates, discover local
+            events, and connect with your neighbours.
           </p>
 
           {/* Live stats */}
