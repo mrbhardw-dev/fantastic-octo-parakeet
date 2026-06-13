@@ -121,9 +121,14 @@ export default async function HelpPage({ searchParams }: Props) {
                         {isNeed ? 'Needs help' : 'Can help'}
                       </Badge>
                     </div>
-                    <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-150 leading-snug">
-                      {post.title}
-                    </h2>
+                    <Link
+                      href={`/help/${post.id}`}
+                      className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded block"
+                    >
+                      <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-150 leading-snug">
+                        {post.title}
+                      </h2>
+                    </Link>
                     <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4 flex-1">{post.body}</p>
                     <div className="flex items-center justify-between pt-3 border-t border-border mt-auto">
                       <p className="text-xs text-muted-foreground">

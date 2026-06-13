@@ -15,9 +15,19 @@ export const metadata: Metadata = {
   title: { default: 'baile.fyi — Kilcock\'s community noticeboard', template: '%s | baile.fyi' },
   description: 'The local community noticeboard for Kilcock, Co. Kildare. Share updates, find events, browse local businesses, and connect with your neighbours.',
   metadataBase: new URL('https://baile.fyi'),
+  keywords: ['Kilcock', 'Kildare', 'community noticeboard', 'local news', 'events', 'local directory', 'Ireland', 'neighbours', 'Leinster', 'Co Kildare'],
+  authors: [{ name: 'baile.fyi', url: 'https://baile.fyi' }],
+  creator: 'baile.fyi',
+  robots: { index: true, follow: true },
   openGraph: {
     siteName: 'baile.fyi',
     locale: 'en_IE',
+    type: 'website',
+    url: 'https://baile.fyi',
+  },
+  twitter: {
+    card: 'summary',
+    site: '@bailefyi',
   },
 }
 

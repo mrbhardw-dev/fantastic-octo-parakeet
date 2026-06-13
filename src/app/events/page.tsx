@@ -20,7 +20,12 @@ export default async function EventsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Upcoming Events</h1>
-          <p className="text-sm text-muted-foreground mt-1">What&rsquo;s on in Kilcock, Co. Kildare</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            What&rsquo;s on in Kilcock, Co. Kildare
+            {events.length > 0 && (
+              <span className="ml-1">· <span className="font-medium text-foreground">{events.length}</span> upcoming</span>
+            )}
+          </p>
         </div>
         <Link href="/events/new">
           <Button className="cursor-pointer gap-2 min-h-[44px]">

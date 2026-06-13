@@ -48,8 +48,31 @@ export default async function PostPage({ params }: Props) {
   const avatarUrl = post.profiles?.avatar_url
   const initials = displayName ? displayName[0].toUpperCase() : '?'
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.body.slice(0, 160),
+    datePublished: post.created_at,
+    ...(post.image_url ? { image: post.image_url } : {}),
+    author: {
+      '@type': 'Person',
+      name: displayName ?? 'Community member',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'baile.fyi',
+      url: 'https://baile.fyi',
+    },
+    url: `https://baile.fyi/feed/${post.id}`,
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <Link
         href="/feed"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"

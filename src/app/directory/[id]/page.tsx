@@ -13,10 +13,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const listing = await getListingById(id)
   if (!listing) return { title: 'Listing not found' }
+  const description = listing.description?.slice(0, 160)
+    ?? `${listing.name} — ${listing.category} in ${listing.town}, Co. Kildare.`
   return {
     title: listing.name,
-    description: listing.description?.slice(0, 160),
+    description,
     alternates: { canonical: `https://baile.fyi/directory/${id}` },
+    openGraph: {
+      title: listing.name,
+      description,
+      type: 'website',
+      url: `https://baile.fyi/directory/${id}`,
+    },
+    twitter: { card: 'summary', title: listing.name, description },
   }
 }
 
@@ -27,8 +36,29 @@ export default async function ListingPage({ params }: Props) {
 
   const hasContact = listing.website || listing.phone || listing.email
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: listing.name,
+    ...(listing.description ? { description: listing.description } : {}),
+    ...(listing.website ? { url: listing.website } : {}),
+    ...(listing.phone ? { telephone: listing.phone } : {}),
+    ...(listing.email ? { email: listing.email } : {}),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: listing.town,
+      addressRegion: `Co. ${listing.county}`,
+      addressCountry: 'IE',
+    },
+    sameAs: listing.website ? [listing.website] : undefined,
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <Link href="/directory" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
         <ArrowLeft size={16} aria-hidden="true" /> Back to directory
       </Link>

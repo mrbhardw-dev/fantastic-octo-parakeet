@@ -63,6 +63,18 @@ export async function getHelpPosts(type?: HelpType): Promise<HelpPost[]> {
   return (data ?? []) as unknown as HelpPost[]
 }
 
+export async function getHelpPostById(id: string): Promise<HelpPost | null> {
+  const { data, error } = await supabase
+    .from('help_posts')
+    .select('*, profiles(display_name)')
+    .eq('id', id)
+    .eq('status', 'approved')
+    .single()
+
+  if (error) return null
+  return data as unknown as HelpPost
+}
+
 export async function reportHelpPost(helpPostId: string, reason: string) {
   const { userId } = await auth()
   if (!userId) return { error: 'You must be signed in to report content.' }

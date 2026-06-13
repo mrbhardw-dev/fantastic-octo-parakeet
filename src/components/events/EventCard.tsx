@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { Calendar, MapPin, ExternalLink } from 'lucide-react'
+import { MapPin, ExternalLink } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import ReportButton from '@/components/feed/ReportButton'
 import type { Event } from '@/types'
 
@@ -16,7 +15,7 @@ export default function EventCard({ event, showReport = true }: EventCardProps) 
 
   return (
     <article className="group">
-      <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/30">
+      <Card className="h-full overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
         {/* Date block */}
         <div className="flex items-center gap-4 bg-primary/8 px-5 py-4 border-b border-border">
           <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-lg w-12 h-12 shrink-0">
@@ -47,22 +46,16 @@ export default function EventCard({ event, showReport = true }: EventCardProps) 
           )}
 
           {event.description && (
-            <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+            <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed flex-1">
               {event.description}
             </p>
           )}
 
           <div className="flex items-center justify-between pt-3 border-t border-border mt-auto">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">
-                <Calendar size={10} className="mr-1" aria-hidden="true" />
-                Event
-              </Badge>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin size={10} aria-hidden="true" />
-                {event.town}
-              </span>
-            </div>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin size={10} aria-hidden="true" />
+              {event.town}, Co. {event.county}
+            </span>
             <div className="flex items-center gap-2">
               {event.source_url && (
                 <a

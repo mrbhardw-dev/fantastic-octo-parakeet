@@ -141,3 +141,25 @@ export const CATEGORY_ACCENT: Record<PostCategory, string> = {
   Question: 'border-l-sky-400',
   'Community Help': 'border-l-orange-400',
 }
+
+export const DIRECTORY_COLORS: Record<DirectoryCategory, string> = {
+  'Food & Drink':        'bg-orange-100 text-orange-800 border-orange-200',
+  'Shops':               'bg-blue-100 text-blue-800 border-blue-200',
+  'Trades':              'bg-amber-100 text-amber-800 border-amber-200',
+  'Health':              'bg-emerald-100 text-emerald-800 border-emerald-200',
+  'Schools & Childcare': 'bg-sky-100 text-sky-800 border-sky-200',
+  'Clubs & Sports':      'bg-purple-100 text-purple-800 border-purple-200',
+  'Transport':           'bg-slate-100 text-slate-700 border-slate-200',
+  'Community Groups':    'bg-rose-100 text-rose-800 border-rose-200',
+}
+
+export const DIRECTORY_ACCENT: Record<DirectoryCategory, string> = {
+  'Food & Drink':        'border-l-orange-400',
+  'Shops':               'border-l-blue-400',
+  'Trades':              'border-l-amber-400',
+  'Health':              'border-l-emerald-400',
+  'Schools & Childcare': 'border-l-sky-400',
+  'Clubs & Sports':      'border-l-purple-400',
+  'Transport':           'border-l-slate-400',
+  'Community Groups':    'border-l-rose-400',
+}

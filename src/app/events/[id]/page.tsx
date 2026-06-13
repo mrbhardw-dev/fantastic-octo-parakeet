@@ -15,10 +15,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const event = await getEventById(id)
   if (!event) return { title: 'Event not found' }
+  const description = event.description?.slice(0, 160)
+    ?? `Event in ${event.town}, Co. Kildare on ${format(new Date(event.starts_at), 'MMMM d, yyyy')}.`
   return {
     title: event.title,
-    description: event.description?.slice(0, 160),
+    description,
     alternates: { canonical: `https://baile.fyi/events/${id}` },
+    openGraph: {
+      title: event.title,
+      description,
+      type: 'article',
+      url: `https://baile.fyi/events/${id}`,
+      publishedTime: event.created_at,
+    },
+    twitter: { card: 'summary', title: event.title, description },
   }
 }
 
@@ -45,8 +55,37 @@ export default async function EventPage({ params }: Props) {
 
   const start = new Date(event.starts_at)
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    ...(event.description ? { description: event.description } : {}),
+    startDate: event.starts_at,
+    ...(event.ends_at ? { endDate: event.ends_at } : {}),
+    location: {
+      '@type': 'Place',
+      name: event.venue_name ?? `${event.town}, Co. Kildare`,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: event.town,
+        addressRegion: `Co. ${event.county}`,
+        addressCountry: 'IE',
+      },
+    },
+    organizer: {
+      '@type': 'Organization',
+      name: 'baile.fyi community',
+      url: 'https://baile.fyi',
+    },
+    url: `https://baile.fyi/events/${event.id}`,
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <Link href="/events" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
         <ArrowLeft size={16} aria-hidden="true" /> Back to events
       </Link>

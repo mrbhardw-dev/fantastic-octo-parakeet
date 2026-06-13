@@ -3,6 +3,7 @@ import { Globe, Phone, Mail } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import ReportButton from '@/components/feed/ReportButton'
+import { DIRECTORY_COLORS, DIRECTORY_ACCENT } from '@/types'
 import type { DirectoryListing } from '@/types'
 
 interface DirectoryCardProps {
@@ -11,9 +12,12 @@ interface DirectoryCardProps {
 }
 
 export default function DirectoryCard({ listing, showReport = true }: DirectoryCardProps) {
+  const colorClass = DIRECTORY_COLORS[listing.category] ?? 'bg-gray-100 text-gray-800 border-gray-200'
+  const accentClass = DIRECTORY_ACCENT[listing.category] ?? 'border-l-gray-300'
+
   return (
     <article className="group">
-      <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/30">
+      <Card className={`h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border-l-4 ${accentClass}`}>
         <CardContent className="p-5 flex flex-col gap-3 h-full">
           <div className="flex items-start justify-between gap-2">
             <Link
@@ -24,7 +28,9 @@ export default function DirectoryCard({ listing, showReport = true }: DirectoryC
                 {listing.name}
               </h2>
             </Link>
-            <Badge variant="secondary" className="text-xs shrink-0">{listing.category}</Badge>
+            <Badge className={`${colorClass} border text-xs shrink-0`} variant="outline">
+              {listing.category}
+            </Badge>
           </div>
 
           {listing.description && (
