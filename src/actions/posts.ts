@@ -80,6 +80,7 @@ export async function getApprovedPosts(
   category?: PostCategory,
   limit = 20,
   offset = 0,
+  excludeId?: string,
 ): Promise<Post[]> {
   let query = supabase
     .from('posts')
@@ -89,6 +90,7 @@ export async function getApprovedPosts(
     .range(offset, offset + limit - 1)
 
   if (category) query = query.eq('category', category)
+  if (excludeId) query = query.neq('id', excludeId)
 
   const { data, error } = await query
   if (error) return []

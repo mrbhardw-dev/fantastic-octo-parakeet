@@ -2,10 +2,11 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatDistanceToNow, format } from 'date-fns'
-import { ArrowLeft, MapPin } from 'lucide-react'
+import { ArrowLeft, MapPin, ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import ReportButton from '@/components/feed/ReportButton'
-import { getPostById } from '@/actions/posts'
+import { getPostById, getApprovedPosts } from '@/actions/posts'
 import { CATEGORY_COLORS } from '@/types'
 import type { Metadata } from 'next'
 
@@ -36,10 +37,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { id } = await params
-  const post = await getPostById(id)
+  const [post, morePosts] = await Promise.all([
+    getPostById(id),
+    getApprovedPosts(undefined, 3, 0, id),
+  ])
   if (!post) notFound()
 
   const colorClass = CATEGORY_COLORS[post.category]
+  const displayName = post.profiles?.display_name
+  const avatarUrl = post.profiles?.avatar_url
+  const initials = displayName ? displayName[0].toUpperCase() : '?'
 
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8">
@@ -66,14 +73,30 @@ export default async function PostPage({ params }: Props) {
         </h1>
 
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
-          <div className="text-sm text-muted-foreground">
-            {post.profiles?.display_name && (
-              <span className="font-medium text-foreground">{post.profiles.display_name}</span>
-            )}{' '}
-            &middot;{' '}
-            <time dateTime={post.created_at} title={format(new Date(post.created_at), 'PPPp')}>
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-            </time>
+          <div className="flex items-center gap-2.5">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName ?? ''}
+                className="h-8 w-8 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <div
+                className="h-8 w-8 rounded-full bg-primary/20 text-primary text-sm font-bold flex items-center justify-center shrink-0"
+                aria-hidden="true"
+              >
+                {initials}
+              </div>
+            )}
+            <div className="text-sm text-muted-foreground">
+              {displayName && (
+                <span className="font-medium text-foreground">{displayName}</span>
+              )}{' '}
+              &middot;{' '}
+              <time dateTime={post.created_at} title={format(new Date(post.created_at), 'PPPp')}>
+                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+              </time>
+            </div>
           </div>
           <ReportButton contentId={post.id} contentType="post" />
         </div>
@@ -91,10 +114,51 @@ export default async function PostPage({ params }: Props) {
           </div>
         )}
 
-        <div className="prose prose-sm prose-neutral max-w-none text-foreground">
-          <p className="whitespace-pre-wrap leading-relaxed">{post.body}</p>
+        <div className="text-foreground">
+          <p className="whitespace-pre-wrap leading-relaxed text-[15px]">{post.body}</p>
         </div>
       </article>
+
+      {/* More from the community */}
+      {morePosts.length > 0 && (
+        <section className="mt-12 pt-8 border-t border-border">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-semibold text-foreground">More from the community</h2>
+            <Link
+              href="/feed"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:underline underline-offset-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+            >
+              See all <ArrowRight size={13} aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {morePosts.map((p) => {
+              const color = CATEGORY_COLORS[p.category] ?? 'bg-gray-100 text-gray-800'
+              return (
+                <Link
+                  key={p.id}
+                  href={`/feed/${p.id}`}
+                  className="group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+                >
+                  <Card className="h-full transition-all duration-200 group-hover:shadow-md group-hover:border-primary/40 group-hover:-translate-y-0.5">
+                    <CardContent className="p-4">
+                      <Badge className={`${color} border text-xs mb-2`} variant="outline">
+                        {p.category}
+                      </Badge>
+                      <h3 className="text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-150 leading-snug">
+                        {p.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {formatDistanceToNow(new Date(p.created_at), { addSuffix: true })}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

@@ -1,5 +1,10 @@
 import Link from 'next/link'
-import { PlusCircle, BookOpen } from 'lucide-react'
+import {
+  PlusCircle, BookOpen, LayoutGrid,
+  UtensilsCrossed, ShoppingBag, Wrench, Stethoscope,
+  GraduationCap, Trophy, Bus, Users,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import DirectoryCard from '@/components/directory/DirectoryCard'
 import { getDirectoryListings } from '@/actions/directory'
@@ -13,6 +18,17 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://baile.fyi/directory' },
 }
 export const revalidate = 300
+
+const DIRECTORY_ICONS: Record<DirectoryCategory, LucideIcon> = {
+  'Food & Drink':        UtensilsCrossed,
+  'Shops':               ShoppingBag,
+  'Trades':              Wrench,
+  'Health':              Stethoscope,
+  'Schools & Childcare': GraduationCap,
+  'Clubs & Sports':      Trophy,
+  'Transport':           Bus,
+  'Community Groups':    Users,
+}
 
 interface Props { searchParams: Promise<{ category?: string }> }
 
@@ -29,7 +45,12 @@ export default async function DirectoryPage({ searchParams }: Props) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Local Directory</h1>
-          <p className="text-sm text-muted-foreground mt-1">Businesses, trades, and community groups in Kilcock</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Businesses, trades, and community groups in Kilcock
+            {listings.length > 0 && (
+              <span className="ml-1">· <span className="font-medium text-foreground">{listings.length}</span> listed</span>
+            )}
+          </p>
         </div>
         <Link href="/directory/new">
           <Button className="cursor-pointer gap-2 min-h-[44px]">
@@ -40,18 +61,38 @@ export default async function DirectoryPage({ searchParams }: Props) {
         </Link>
       </div>
 
-      {/* Category tabs */}
-      <div className="flex gap-2 flex-wrap mb-6" role="group" aria-label="Filter by category">
+      {/* Category filter pills */}
+      <div className="flex gap-2 flex-wrap mb-8" role="group" aria-label="Filter by category">
         <Link href="/directory">
-          <Button variant={!validCategory ? 'default' : 'outline'} size="sm" className="cursor-pointer min-h-[36px]">All</Button>
+          <button
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[36px] ${
+              !validCategory
+                ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
+            }`}
+          >
+            <LayoutGrid size={13} aria-hidden="true" />
+            All
+          </button>
         </Link>
-        {DIRECTORY_CATEGORIES.map((cat) => (
-          <Link key={cat} href={`/directory?category=${encodeURIComponent(cat)}`}>
-            <Button variant={validCategory === cat ? 'default' : 'outline'} size="sm" className="cursor-pointer min-h-[36px]">
-              {cat}
-            </Button>
-          </Link>
-        ))}
+        {DIRECTORY_CATEGORIES.map((cat) => {
+          const Icon = DIRECTORY_ICONS[cat]
+          const isActive = validCategory === cat
+          return (
+            <Link key={cat} href={`/directory?category=${encodeURIComponent(cat)}`}>
+              <button
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[36px] ${
+                  isActive
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
+                }`}
+              >
+                <Icon size={13} aria-hidden="true" />
+                {cat}
+              </button>
+            </Link>
+          )
+        })}
       </div>
 
       {listings.length === 0 ? (
