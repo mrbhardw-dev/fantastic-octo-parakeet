@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
-import { Menu, X, Clover, Rss, CalendarDays, BookOpen, HandHeart, Shield, Sun, Moon } from 'lucide-react'
+import { Menu, X, Clover, Rss, CalendarDays, BookOpen, HandHeart, Sun, Moon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
@@ -11,12 +11,13 @@ import { cn } from '@/lib/utils'
 import NeighbourhoodSwitcher from '@/components/NeighbourhoodSwitcher'
 
 const navLinks = [
-  { href: '/feed',       label: 'Feed',        Icon: Rss },
-  { href: '/events',     label: 'Events',      Icon: CalendarDays },
-  { href: '/directory',  label: 'Directory',   Icon: BookOpen },
-  { href: '/help',       label: 'Help',        Icon: HandHeart },
-  { href: '/guidelines', label: 'Guidelines',  Icon: Shield },
+  { href: '/feed',       label: 'Feed',       Icon: Rss },
+  { href: '/events',     label: 'Events',     Icon: CalendarDays },
+  { href: '/directory',  label: 'Directory',  Icon: BookOpen },
+  { href: '/help',       label: 'Help',       Icon: HandHeart },
 ]
+
+const AUTH_ROUTES = ['/sign-in', '/sign-up']
 
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
@@ -39,6 +40,8 @@ export default function Header() {
   const pathname = usePathname()
   const { isSignedIn } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  if (AUTH_ROUTES.some(r => pathname.startsWith(r))) return null
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-md">

@@ -18,7 +18,7 @@ export default async function SignUpPage() {
   const stats = await getCommunityStats()
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="flex-1 flex flex-col lg:flex-row">
       {/* Left: brand panel */}
       <div className="lg:w-[460px] shrink-0 bg-primary text-primary-foreground p-8 lg:p-12 flex flex-col justify-center">
         <div className="max-w-sm mx-auto lg:mx-0 w-full">

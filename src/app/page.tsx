@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
+import { auth } from '@clerk/nextjs/server'
 import { Button } from '@/components/ui/button'
 import WeatherWidget from '@/components/weather/WeatherWidget'
 import { getCommunityStats } from '@/actions/stats'
@@ -24,6 +25,7 @@ import {
 export default async function HomePage() {
   const cookieStore = await cookies()
   const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+  const { userId } = await auth()
 
   const [stats, recentPosts] = await Promise.all([
     getCommunityStats(hood.town),
@@ -85,11 +87,19 @@ export default async function HomePage() {
                   Browse local feed
                 </Button>
               </Link>
-              <Link href="/feed/new" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full bg-white border-2 border-primary text-primary rounded-full font-black px-12 py-8 text-xl hover:bg-secondary">
-                  Post an update
-                </Button>
-              </Link>
+              {userId ? (
+                <Link href="/feed/new" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="w-full bg-white border-2 border-primary text-primary rounded-full font-black px-12 py-8 text-xl hover:bg-secondary">
+                    Post an update
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/sign-up" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="w-full bg-white border-2 border-primary text-primary rounded-full font-black px-12 py-8 text-xl hover:bg-secondary">
+                    Join free to post
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -214,17 +224,17 @@ export default async function HomePage() {
               <div className="text-sm font-black text-blue-600 flex items-center gap-2 group-hover:gap-3 transition-all">Search <ChevronRight size={16} /></div>
             </Link>
 
-            {/* CTA Tile (Primary Color) */}
-            <div className="md:col-span-1 bg-primary rounded-[2.5rem] p-10 flex flex-col items-center justify-center text-center text-white relative overflow-hidden group">
+            {/* CTA Tile (Dark, contrasting) */}
+            <div className="md:col-span-1 bg-foreground rounded-[2.5rem] p-10 flex flex-col items-center justify-center text-center text-background relative overflow-hidden group">
               <div className="z-10 relative">
                 <h4 className="font-black text-2xl mb-6 tracking-tighter leading-tight">Your town needs you!</h4>
                 <Link href="/sign-up">
-                  <Button variant="secondary" size="lg" className="rounded-full font-black px-8 py-6 hover-bounce text-primary shadow-xl shadow-black/10">
+                  <Button size="lg" className="rounded-full font-black px-8 py-6 hover-bounce bg-accent text-foreground hover:bg-accent/90 shadow-xl shadow-black/20">
                     Join Baile
                   </Button>
                 </Link>
               </div>
-              <div className="absolute inset-0 opacity-10 pointer-events-none p-4 flex items-center justify-center group-hover:scale-125 transition-transform duration-1000">
+              <div className="absolute inset-0 opacity-5 pointer-events-none p-4 flex items-center justify-center group-hover:scale-125 transition-transform duration-1000">
                  <Home size={180} />
               </div>
             </div>

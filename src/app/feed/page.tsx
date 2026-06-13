@@ -59,39 +59,43 @@ export default async function FeedPage({ searchParams }: Props) {
         </div>
       </header>
 
-      {/* Sticky Category Filter Bar */}
-      <nav className="sticky top-16 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 py-6 px-6 mb-16">
+      {/* Category Filter Bar */}
+      <nav className="border-b border-border/50 py-6 px-6 mb-16">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 md:pb-0">
-            <Link href="/feed">
-              <button
-                className={cn(
-                  "whitespace-nowrap px-8 py-3.5 rounded-full font-black text-sm transition-all shadow-sm",
-                  !validCategory
-                    ? "bg-accent text-accent-foreground scale-105"
-                    : "bg-white border border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
-                )}
-              >
-                All Notices
-              </button>
-            </Link>
-            {POST_CATEGORIES.map((cat) => {
-              const isActive = validCategory === cat
-              return (
-                <Link key={cat} href={`/feed?category=${encodeURIComponent(cat)}`}>
-                  <button
-                    className={cn(
-                      "whitespace-nowrap px-8 py-3.5 rounded-full font-black text-sm transition-all",
-                      isActive
-                        ? "bg-accent text-accent-foreground shadow-lg scale-105"
-                        : "bg-white border border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
-                    )}
-                  >
-                    {cat}
-                  </button>
-                </Link>
-              )
-            })}
+          <div className="relative">
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 md:pb-0">
+              <Link href="/feed">
+                <button
+                  className={cn(
+                    "whitespace-nowrap px-8 py-3.5 rounded-full font-black text-sm transition-all shadow-sm",
+                    !validCategory
+                      ? "bg-accent text-accent-foreground scale-105"
+                      : "bg-white border border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                  )}
+                >
+                  All Notices
+                </button>
+              </Link>
+              {POST_CATEGORIES.map((cat) => {
+                const isActive = validCategory === cat
+                return (
+                  <Link key={cat} href={`/feed?category=${encodeURIComponent(cat)}`}>
+                    <button
+                      className={cn(
+                        "whitespace-nowrap px-8 py-3.5 rounded-full font-black text-sm transition-all",
+                        isActive
+                          ? "bg-accent text-accent-foreground shadow-lg scale-105"
+                          : "bg-white border border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  </Link>
+                )
+              })}
+            </div>
+            {/* Scroll-fade hint on mobile */}
+            <div className="md:hidden absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none" aria-hidden="true" />
           </div>
         </div>
       </nav>
@@ -125,11 +129,13 @@ export default async function FeedPage({ searchParams }: Props) {
             </div>
           )}
 
-          {posts.length > 0 && (
-            <div className="mt-32 text-center">
-              <Button variant="outline" size="lg" className="rounded-full font-black px-16 py-10 text-2xl border-4 border-primary text-primary hover:bg-secondary transition-all hover:scale-105">
-                Browse older notices
-              </Button>
+          {posts.length >= 20 && (
+            <div className="mt-32 text-center space-y-4">
+              <Link href={`/feed?page=2${validCategory ? `&category=${encodeURIComponent(validCategory)}` : ''}`}>
+                <Button variant="outline" size="lg" className="rounded-full font-black px-16 py-10 text-2xl border-4 border-primary text-primary hover:bg-secondary transition-all hover:scale-105">
+                  Browse older notices
+                </Button>
+              </Link>
             </div>
           )}
         </div>
