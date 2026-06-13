@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -22,18 +23,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IE" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en-IE" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col bg-background text-foreground antialiased">
-        <ClerkProvider>
-          <a href="#main-content" className="skip-link">Skip to main content</a>
-          <Header />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <Toaster position="bottom-right" richColors />
-          <Analytics />
-        </ClerkProvider>
+        <ThemeProvider>
+          <ClerkProvider>
+            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <Header />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <Toaster position="bottom-right" richColors />
+            <Analytics />
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

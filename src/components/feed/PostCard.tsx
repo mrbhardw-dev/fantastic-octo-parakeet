@@ -16,12 +16,15 @@ interface PostCardProps {
 export default function PostCard({ post, showReport = true }: PostCardProps) {
   const ago = formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
   const colorClass = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-800'
+  const displayName = post.profiles?.display_name
+  const avatarUrl = post.profiles?.avatar_url
+  const initials = displayName ? displayName[0].toUpperCase() : '?'
 
   return (
     <article className="group">
-      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/30">
+      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 h-full flex flex-col">
         {post.image_url && (
-          <div className="relative h-48 w-full overflow-hidden">
+          <div className="relative h-48 w-full overflow-hidden shrink-0">
             <Image
               src={post.image_url}
               alt={post.title}
@@ -31,7 +34,7 @@ export default function PostCard({ post, showReport = true }: PostCardProps) {
             />
           </div>
         )}
-        <CardContent className="p-5">
+        <CardContent className="p-5 flex flex-col flex-1">
           <div className="flex items-start justify-between gap-3 mb-3">
             <Badge className={`${colorClass} border text-xs font-medium shrink-0`} variant="outline">
               {post.category}
@@ -51,16 +54,32 @@ export default function PostCard({ post, showReport = true }: PostCardProps) {
             </h2>
           </Link>
 
-          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-4">
+          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-4 flex-1">
             {post.body}
           </p>
 
-          <div className="flex items-center justify-between gap-2 pt-3 border-t border-border">
-            <div className="text-xs text-muted-foreground">
-              {post.profiles?.display_name && (
-                <span className="font-medium text-foreground">{post.profiles.display_name}</span>
-              )}{' '}
-              <span>{ago}</span>
+          <div className="flex items-center justify-between gap-2 pt-3 border-t border-border mt-auto">
+            <div className="flex items-center gap-2 min-w-0">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={displayName ?? ''}
+                  className="h-6 w-6 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <div
+                  className="h-6 w-6 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center shrink-0"
+                  aria-hidden="true"
+                >
+                  {initials}
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground truncate">
+                {displayName && (
+                  <span className="font-medium text-foreground">{displayName}</span>
+                )}{' '}
+                <span>{ago}</span>
+              </div>
             </div>
             {showReport && <ReportButton contentId={post.id} contentType="post" />}
           </div>

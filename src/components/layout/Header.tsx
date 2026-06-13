@@ -3,18 +3,36 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
-import { Menu, X, Leaf } from 'lucide-react'
-import { useState } from 'react'
+import { Menu, X, Leaf, Rss, CalendarDays, BookOpen, HandHeart, Shield, Sun, Moon } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
-  { href: '/feed', label: 'Feed' },
-  { href: '/events', label: 'Events' },
-  { href: '/directory', label: 'Directory' },
-  { href: '/help', label: 'Help' },
-  { href: '/guidelines', label: 'Guidelines' },
+  { href: '/feed',       label: 'Feed',        Icon: Rss },
+  { href: '/events',     label: 'Events',      Icon: CalendarDays },
+  { href: '/directory',  label: 'Directory',   Icon: BookOpen },
+  { href: '/help',       label: 'Help',        Icon: HandHeart },
+  { href: '/guidelines', label: 'Guidelines',  Icon: Shield },
 ]
+
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return <div className="h-9 w-9" />
+  return (
+    <button
+      type="button"
+      aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+      className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+    </button>
+  )
+}
 
 export default function Header() {
   const pathname = usePathname()
@@ -40,25 +58,27 @@ export default function Header() {
           </Link>
 
           {/* Desktop nav */}
-          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0.5">
+            {navLinks.map(({ href, label, Icon }) => (
               <Link
-                key={link.href}
-                href={link.href}
+                key={href}
+                href={href}
                 className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  pathname.startsWith(link.href)
+                  'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  pathname.startsWith(href)
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted',
                 )}
               >
-                {link.label}
+                <Icon size={14} aria-hidden="true" />
+                {label}
               </Link>
             ))}
           </nav>
 
-          {/* Auth */}
-          <div className="flex items-center gap-3">
+          {/* Auth + theme */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             {!isSignedIn ? (
               <>
                 <Link href="/sign-in">
@@ -91,19 +111,20 @@ export default function Header() {
       {mobileOpen && (
         <div id="mobile-nav" className="md:hidden border-t border-border bg-card">
           <nav aria-label="Mobile navigation" className="mx-auto max-w-6xl px-4 py-3 flex flex-col gap-1">
-            {navLinks.map((link) => (
+            {navLinks.map(({ href, label, Icon }) => (
               <Link
-                key={link.href}
-                href={link.href}
+                key={href}
+                href={href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'px-3 py-3 rounded-md text-sm font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] flex items-center',
-                  pathname.startsWith(link.href)
+                  'flex items-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[44px]',
+                  pathname.startsWith(href)
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted',
                 )}
               >
-                {link.label}
+                <Icon size={15} aria-hidden="true" />
+                {label}
               </Link>
             ))}
             {!isSignedIn && (

@@ -1,7 +1,12 @@
 import Link from 'next/link'
+import { formatDistanceToNow } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import WeatherWidget from '@/components/weather/WeatherWidget'
+import { getCommunityStats } from '@/actions/stats'
+import { getApprovedPosts } from '@/actions/posts'
+import { CATEGORY_COLORS } from '@/types'
 import {
   Rss,
   CalendarDays,
@@ -10,19 +15,29 @@ import {
   MapPin,
   ShieldCheck,
   Users,
-  MessageSquare,
   ArrowRight,
+  PenLine,
+  Clock,
+  MessageSquare,
+  Building2,
 } from 'lucide-react'
 
-export default function HomePage() {
+export const revalidate = 300
+
+export default async function HomePage() {
+  const [stats, recentPosts] = await Promise.all([
+    getCommunityStats(),
+    getApprovedPosts(undefined, 3),
+  ])
+
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/8 via-secondary/30 to-background py-20 px-4 sm:py-28">
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-secondary/40 to-background py-20 px-4 sm:py-28">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
             <MapPin size={14} aria-hidden="true" />
-            Now in Kilcock, Co. Kildare
+            Now serving Kilcock, Co. Kildare
           </div>
           <div className="mb-6 flex justify-center">
             <WeatherWidget />
@@ -37,35 +52,117 @@ export default function HomePage() {
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link href="/feed">
-              <Button size="lg" className="cursor-pointer gap-2 min-h-[44px]">
+              <Button size="lg" className="cursor-pointer gap-2 min-h-[44px] shadow-md">
                 <Rss size={18} aria-hidden="true" />
-                View local feed
+                Browse local feed
               </Button>
             </Link>
             <Link href="/feed/new">
               <Button size="lg" variant="outline" className="cursor-pointer gap-2 min-h-[44px]">
-                <MessageSquare size={18} aria-hidden="true" />
+                <PenLine size={18} aria-hidden="true" />
                 Post an update
               </Button>
             </Link>
-            <Link href="/events/new">
+            <Link href="/events">
               <Button size="lg" variant="outline" className="cursor-pointer gap-2 min-h-[44px]">
                 <CalendarDays size={18} aria-hidden="true" />
-                Add an event
-              </Button>
-            </Link>
-            <Link href="/directory/new">
-              <Button size="lg" variant="outline" className="cursor-pointer gap-2 min-h-[44px]">
-                <BookOpen size={18} aria-hidden="true" />
-                List a local service
+                See events
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
+      {/* Activity stats strip */}
+      <section className="border-y border-border bg-muted/30 py-5 px-4" aria-label="Community activity">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <MessageSquare size={16} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{stats.posts}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Community posts</p>
+              </div>
+            </div>
+            <div className="h-8 w-px bg-border hidden sm:block" aria-hidden="true" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                <CalendarDays size={16} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{stats.events}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Upcoming events</p>
+              </div>
+            </div>
+            <div className="h-8 w-px bg-border hidden sm:block" aria-hidden="true" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                <Building2 size={16} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{stats.businesses}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Local businesses</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Latest from the community */}
+      {recentPosts.length > 0 && (
+        <section className="py-14 px-4">
+          <div className="mx-auto max-w-6xl">
+            <div className="flex items-center justify-between mb-7">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Latest from the community</h2>
+                <p className="text-sm text-muted-foreground mt-1">What your neighbours are sharing right now</p>
+              </div>
+              <Link
+                href="/feed"
+                className="flex items-center gap-1 text-sm font-medium text-primary hover:underline underline-offset-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+              >
+                See all <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {recentPosts.map((post) => {
+                const colorClass = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-800'
+                const ago = formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
+                return (
+                  <Link
+                    key={post.id}
+                    href={`/feed/${post.id}`}
+                    className="group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+                  >
+                    <Card className="h-full transition-all duration-200 group-hover:shadow-md group-hover:border-primary/40 group-hover:-translate-y-0.5">
+                      <CardContent className="p-4 flex flex-col h-full">
+                        <Badge className={`${colorClass} border text-xs font-medium mb-3 self-start`} variant="outline">
+                          {post.category}
+                        </Badge>
+                        <h3 className="font-semibold text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-150 mb-2 leading-snug">
+                          {post.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed flex-1">
+                          {post.body}
+                        </p>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+                          <Clock size={10} aria-hidden="true" />
+                          {ago}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Features */}
-      <section className="py-16 px-4">
+      <section className={`py-16 px-4 ${recentPosts.length > 0 ? 'bg-muted/20' : ''}`}>
         <div className="mx-auto max-w-6xl">
           <h2 className="text-2xl font-bold text-center text-foreground mb-3">
             Everything happening in Kilcock
@@ -78,7 +175,7 @@ export default function HomePage() {
               <Link key={f.href} href={f.href} className="cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
                 <Card className="h-full transition-all duration-200 group-hover:shadow-md group-hover:border-primary/40 group-hover:-translate-y-0.5">
                   <CardContent className="p-6">
-                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${f.bgColor} ${f.textColor}`}>
                       <f.icon size={22} aria-hidden="true" />
                     </div>
                     <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
@@ -145,24 +242,32 @@ const features = [
     icon: Rss,
     title: 'Local Feed',
     description: 'Alerts, recommendations, lost & found, and news from your neighbours in Kilcock.',
+    bgColor: 'bg-primary/10',
+    textColor: 'text-primary',
   },
   {
     href: '/events',
     icon: CalendarDays,
     title: 'Events',
-    description: 'Discover and share what\'s happening in Kilcock and the surrounding area.',
+    description: "Discover and share what's happening in Kilcock and the surrounding area.",
+    bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+    textColor: 'text-purple-600 dark:text-purple-400',
   },
   {
     href: '/directory',
     icon: BookOpen,
     title: 'Local Directory',
     description: 'Browse local businesses, tradespeople, clubs, and community groups.',
+    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+    textColor: 'text-blue-600 dark:text-blue-400',
   },
   {
     href: '/help',
     icon: HandHeart,
     title: 'Neighbour Help',
     description: 'Ask for help or offer a hand to someone in your community.',
+    bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+    textColor: 'text-amber-600 dark:text-amber-400',
   },
 ]
 

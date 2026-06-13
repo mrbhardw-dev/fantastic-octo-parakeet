@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { PenLine } from 'lucide-react'
+import { PenLine, AlertTriangle, ThumbsUp, Search, CalendarDays, Building2, HelpCircle, HandHeart, LayoutGrid } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PostCard from '@/components/feed/PostCard'
 import { getApprovedPosts } from '@/actions/posts'
@@ -13,6 +14,16 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://baile.fyi/feed' },
 }
 export const revalidate = 60
+
+const CATEGORY_ICONS: Record<PostCategory, LucideIcon> = {
+  Alert: AlertTriangle,
+  Recommendation: ThumbsUp,
+  'Lost & Found': Search,
+  Event: CalendarDays,
+  'Local Business': Building2,
+  Question: HelpCircle,
+  'Community Help': HandHeart,
+}
 
 interface Props {
   searchParams: Promise<{ category?: string }>
@@ -32,7 +43,12 @@ export default async function FeedPage({ searchParams }: Props) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Local Feed</h1>
-          <p className="text-sm text-muted-foreground mt-1">Updates from Kilcock, Co. Kildare</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Updates from Kilcock, Co. Kildare
+            {posts.length > 0 && (
+              <span className="ml-1">· <span className="font-medium text-foreground">{posts.length}</span> {validCategory ? 'posts' : 'total'}</span>
+            )}
+          </p>
         </div>
         <Link href="/feed/new">
           <Button className="cursor-pointer gap-2 min-h-[44px]">
@@ -44,27 +60,37 @@ export default async function FeedPage({ searchParams }: Props) {
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-2 flex-wrap mb-6" role="group" aria-label="Filter by category">
+      <div className="flex gap-2 flex-wrap mb-8" role="group" aria-label="Filter by category">
         <Link href="/feed">
-          <Button
-            variant={!validCategory ? 'default' : 'outline'}
-            size="sm"
-            className="cursor-pointer min-h-[36px]"
+          <button
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[36px] ${
+              !validCategory
+                ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
+            }`}
           >
+            <LayoutGrid size={13} aria-hidden="true" />
             All
-          </Button>
+          </button>
         </Link>
-        {POST_CATEGORIES.map((cat) => (
-          <Link key={cat} href={`/feed?category=${encodeURIComponent(cat)}`}>
-            <Button
-              variant={validCategory === cat ? 'default' : 'outline'}
-              size="sm"
-              className="cursor-pointer min-h-[36px]"
-            >
-              {cat}
-            </Button>
-          </Link>
-        ))}
+        {POST_CATEGORIES.map((cat) => {
+          const Icon = CATEGORY_ICONS[cat]
+          const isActive = validCategory === cat
+          return (
+            <Link key={cat} href={`/feed?category=${encodeURIComponent(cat)}`}>
+              <button
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[36px] ${
+                  isActive
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
+                }`}
+              >
+                <Icon size={13} aria-hidden="true" />
+                {cat}
+              </button>
+            </Link>
+          )
+        })}
       </div>
 
       {/* Posts grid */}
