@@ -5,7 +5,7 @@ import { MapPin } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import ReportButton from '@/components/feed/ReportButton'
-import { CATEGORY_COLORS } from '@/types'
+import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
 import type { Post } from '@/types'
 
 interface PostCardProps {
@@ -16,13 +16,14 @@ interface PostCardProps {
 export default function PostCard({ post, showReport = true }: PostCardProps) {
   const ago = formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
   const colorClass = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-800'
+  const accentClass = CATEGORY_ACCENT[post.category] ?? 'border-l-gray-300'
   const displayName = post.profiles?.display_name
   const avatarUrl = post.profiles?.avatar_url
   const initials = displayName ? displayName[0].toUpperCase() : '?'
 
   return (
     <article className="group">
-      <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 h-full flex flex-col">
+      <Card className={`overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col border-l-4 ${accentClass}`}>
         {post.image_url && (
           <div className="relative h-48 w-full overflow-hidden shrink-0">
             <Image

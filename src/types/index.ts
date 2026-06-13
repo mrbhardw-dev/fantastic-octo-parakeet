@@ -131,3 +131,13 @@ export const CATEGORY_COLORS: Record<PostCategory, string> = {
   Question: 'bg-sky-100 text-sky-800 border-sky-200',
   'Community Help': 'bg-orange-100 text-orange-800 border-orange-200',
 }
+
+export const CATEGORY_ACCENT: Record<PostCategory, string> = {
+  Alert: 'border-l-red-400',
+  Recommendation: 'border-l-blue-400',
+  'Lost & Found': 'border-l-amber-400',
+  Event: 'border-l-purple-400',
+  'Local Business': 'border-l-emerald-400',
+  Question: 'border-l-sky-400',
+  'Community Help': 'border-l-orange-400',
+}

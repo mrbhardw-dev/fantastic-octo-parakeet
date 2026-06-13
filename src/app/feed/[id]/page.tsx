@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import ReportButton from '@/components/feed/ReportButton'
 import { getPostById, getApprovedPosts } from '@/actions/posts'
-import { CATEGORY_COLORS } from '@/types'
+import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
 import type { Metadata } from 'next'
 
 interface Props {
@@ -134,13 +134,14 @@ export default async function PostPage({ params }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {morePosts.map((p) => {
               const color = CATEGORY_COLORS[p.category] ?? 'bg-gray-100 text-gray-800'
+              const accent = CATEGORY_ACCENT[p.category] ?? 'border-l-gray-300'
               return (
                 <Link
                   key={p.id}
                   href={`/feed/${p.id}`}
                   className="group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
                 >
-                  <Card className="h-full transition-all duration-200 group-hover:shadow-md group-hover:border-primary/40 group-hover:-translate-y-0.5">
+                  <Card className={`h-full transition-all duration-200 group-hover:shadow-lg group-hover:-translate-y-1 border-l-4 ${accent}`}>
                     <CardContent className="p-4">
                       <Badge className={`${color} border text-xs mb-2`} variant="outline">
                         {p.category}

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import WeatherWidget from '@/components/weather/WeatherWidget'
 import { getCommunityStats } from '@/actions/stats'
 import { getApprovedPosts } from '@/actions/posts'
-import { CATEGORY_COLORS } from '@/types'
+import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
 import {
   Rss,
   CalendarDays,
@@ -33,26 +33,47 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-secondary/40 to-background py-20 px-4 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-secondary/30 to-background py-20 px-4 sm:py-28">
+        {/* Decorative dot-grid */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07] dark:opacity-[0.05]"
+          aria-hidden="true"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #166534 1.5px, transparent 1.5px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Decorative glow blobs */}
+        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+
+        <div className="relative mx-auto max-w-3xl text-center">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
             <MapPin size={14} aria-hidden="true" />
             Now serving Kilcock, Co. Kildare
           </div>
-          <div className="mb-6 flex justify-center">
+          <div className="mb-7 flex justify-center">
             <WeatherWidget />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-[1.1]">
             Your town,<br />
-            <span className="text-primary">your community</span>
+            <span className="relative text-primary">
+              your community
+              <span
+                className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-primary/30"
+                aria-hidden="true"
+              />
+            </span>
           </h1>
-          <p className="mt-6 text-lg leading-relaxed text-muted-foreground max-w-xl mx-auto">
+          <p className="mt-7 text-lg leading-relaxed text-muted-foreground max-w-xl mx-auto">
             baile.fyi is Kilcock&rsquo;s local community noticeboard — a place for residents,
             businesses, clubs, and neighbours to share what matters in your town.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link href="/feed">
-              <Button size="lg" className="cursor-pointer gap-2 min-h-[44px] shadow-md">
+              <Button
+                size="lg"
+                className="cursor-pointer gap-2 min-h-[44px] shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow duration-200"
+              >
                 <Rss size={18} aria-hidden="true" />
                 Browse local feed
               </Button>
@@ -129,6 +150,7 @@ export default async function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {recentPosts.map((post) => {
                 const colorClass = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-800'
+                const accentClass = CATEGORY_ACCENT[post.category] ?? 'border-l-gray-300'
                 const ago = formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
                 return (
                   <Link
@@ -136,7 +158,7 @@ export default async function HomePage() {
                     href={`/feed/${post.id}`}
                     className="group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
                   >
-                    <Card className="h-full transition-all duration-200 group-hover:shadow-md group-hover:border-primary/40 group-hover:-translate-y-0.5">
+                    <Card className={`h-full transition-all duration-200 group-hover:shadow-lg group-hover:-translate-y-1 border-l-4 ${accentClass}`}>
                       <CardContent className="p-4 flex flex-col h-full">
                         <Badge className={`${colorClass} border text-xs font-medium mb-3 self-start`} variant="outline">
                           {post.category}

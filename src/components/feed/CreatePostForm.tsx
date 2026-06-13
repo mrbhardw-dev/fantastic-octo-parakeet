@@ -21,9 +21,11 @@ import {
 import { createPost } from '@/actions/posts'
 import { POST_CATEGORIES } from '@/types'
 
+const BODY_MAX = 5000
+
 const schema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(200),
-  body: z.string().min(10, 'Description must be at least 10 characters').max(5000),
+  body: z.string().min(10, 'Description must be at least 10 characters').max(BODY_MAX),
   category: z.string().min(1, 'Please select a category'),
 })
 type FormData = z.infer<typeof schema>
@@ -35,9 +37,10 @@ export default function CreatePostForm() {
   const [previewUrl, setPreviewUrl] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+  const bodyLen = (watch('body') ?? '').length
 
   async function onSubmit(data: FormData) {
     const fd = new FormData()
@@ -127,14 +130,19 @@ export default function CreatePostForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="post-body">Details <span aria-hidden="true" className="text-destructive">*</span></Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="post-body">Details <span aria-hidden="true" className="text-destructive">*</span></Label>
+          <span className={`text-xs tabular-nums ${bodyLen > BODY_MAX * 0.9 ? 'text-destructive' : 'text-muted-foreground'}`}>
+            {bodyLen}/{BODY_MAX}
+          </span>
+        </div>
         <Textarea
           id="post-body"
           {...register('body')}
           placeholder="Provide more information for the community…"
           rows={5}
           className={`resize-none ${errors.body ? 'border-destructive' : ''}`}
-          maxLength={5000}
+          maxLength={BODY_MAX}
           aria-describedby={errors.body ? 'body-error' : undefined}
         />
         {errors.body && <p id="body-error" className="text-sm text-destructive" role="alert">{errors.body.message}</p>}
