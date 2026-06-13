@@ -7,7 +7,11 @@ import { ArrowLeft, MapPin, ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import ReportButton from '@/components/feed/ReportButton'
+import PostReactions from '@/components/feed/PostReactions'
+import CommentSection from '@/components/feed/CommentSection'
 import { getPostById, getApprovedPosts } from '@/actions/posts'
+import { getReactions } from '@/actions/reactions'
+import { getComments } from '@/actions/comments'
 import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
 import type { Metadata } from 'next'
@@ -41,9 +45,11 @@ export default async function PostPage({ params }: Props) {
   const { id } = await params
   const cookieStore = await cookies()
   const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
-  const [post, morePosts] = await Promise.all([
+  const [post, morePosts, reactions, comments] = await Promise.all([
     getPostById(id),
     getApprovedPosts(undefined, 3, 0, id, hood.town),
+    getReactions(id),
+    getComments(id),
   ])
   if (!post) notFound()
 
@@ -144,7 +150,16 @@ export default async function PostPage({ params }: Props) {
         <div className="text-foreground">
           <p className="whitespace-pre-wrap leading-relaxed text-[15px]">{post.body}</p>
         </div>
+
+        {/* Reactions */}
+        <div className="mt-6 pt-5 border-t border-border">
+          <p className="text-xs text-muted-foreground mb-3 font-medium uppercase tracking-wide">Was this helpful?</p>
+          <PostReactions postId={post.id} initial={reactions} />
+        </div>
       </article>
+
+      {/* Comments */}
+      <CommentSection postId={post.id} initialComments={comments} />
 
       {/* More from the community */}
       {morePosts.length > 0 && (
