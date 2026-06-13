@@ -9,6 +9,8 @@ import type { ReactionCounts, ReactionType } from '@/actions/reactions'
 const REACTIONS: { type: ReactionType; emoji: string; label: string }[] = [
   { type: 'helpful', emoji: '👍', label: 'Helpful' },
   { type: 'trust', emoji: '🛡️', label: 'Trustworthy' },
+  { type: 'fire', emoji: '🔥', label: 'Hot' },
+  { type: 'heart', emoji: '❤️', label: 'Love' },
 ]
 
 interface Props {
