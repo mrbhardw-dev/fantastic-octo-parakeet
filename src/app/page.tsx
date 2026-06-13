@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import WeatherWidget from '@/components/weather/WeatherWidget'
+import TopContributors from '@/components/feed/TopContributors'
 import { getCommunityStats } from '@/actions/stats'
 import { getApprovedPosts } from '@/actions/posts'
+import { getTopContributors } from '@/actions/reactions'
 import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
 import {
@@ -28,9 +30,10 @@ export default async function HomePage() {
   const cookieStore = await cookies()
   const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
 
-  const [stats, recentPosts] = await Promise.all([
+  const [stats, recentPosts, topContributors] = await Promise.all([
     getCommunityStats(hood.town),
     getApprovedPosts(undefined, 3, 0, undefined, hood.town),
+    getTopContributors(hood.town, 5),
   ])
 
   return (
@@ -189,8 +192,11 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* Community Stars */}
+      <TopContributors contributors={topContributors} />
+
       {/* Features */}
-      <section className={`py-16 px-4 ${recentPosts.length > 0 ? 'bg-muted/20' : ''}`}>
+      <section className={`py-16 px-4 ${recentPosts.length > 0 || topContributors.length > 0 ? 'bg-muted/20' : ''}`}>
         <div className="mx-auto max-w-6xl">
           <h2 className="text-2xl font-bold text-center text-foreground mb-3">
             Everything happening in Kilcock
