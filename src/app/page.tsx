@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { formatDistanceToNow } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -6,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import WeatherWidget from '@/components/weather/WeatherWidget'
 import { getCommunityStats } from '@/actions/stats'
 import { getApprovedPosts } from '@/actions/posts'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
 import {
   Rss,
@@ -22,12 +24,13 @@ import {
   Building2,
 } from 'lucide-react'
 
-export const revalidate = 300
-
 export default async function HomePage() {
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
   const [stats, recentPosts] = await Promise.all([
-    getCommunityStats(),
-    getApprovedPosts(undefined, 3),
+    getCommunityStats(hood.town),
+    getApprovedPosts(undefined, 3, 0, undefined, hood.town),
   ])
 
   return (
@@ -49,7 +52,7 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-3xl text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
             <MapPin size={14} aria-hidden="true" />
-            Kilcock, Co. Kildare
+            {hood.name}, Co. {hood.county}
           </div>
           <p className="text-xs text-primary/60 font-medium tracking-[0.2em] uppercase mb-5">
             baile /bal-uh/ · Irish for home, place &amp; belonging
@@ -68,7 +71,7 @@ export default async function HomePage() {
             </span>
           </h1>
           <p className="mt-7 text-lg leading-relaxed text-muted-foreground max-w-xl mx-auto">
-            The community noticeboard for Kilcock — a shared home page for residents,
+            The community noticeboard for {hood.name} — a shared home page for residents,
             businesses, clubs, and neighbours to share what matters on your doorstep.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">

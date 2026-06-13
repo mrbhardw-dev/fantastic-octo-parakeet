@@ -3,9 +3,11 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
 import { getOrCreateProfileId } from '@/lib/profile'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import type { Post, PostCategory } from '@/types'
 
 const PostSchema = z.object({
@@ -34,13 +36,16 @@ export async function createPost(formData: FormData) {
   const profileId = await getOrCreateProfileId(userId)
   if (!profileId) return { error: 'Could not resolve your profile. Please try signing out and back in.' }
 
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
   const { error } = await supabase.from('posts').insert({
     title: parsed.data.title,
     body: parsed.data.body,
     category: parsed.data.category,
     image_url: parsed.data.image_url || null,
-    town: 'Kilcock',
-    county: 'Kildare',
+    town: hood.town,
+    county: hood.county,
     status: 'pending',
     created_by: profileId,
   })
@@ -81,6 +86,7 @@ export async function getApprovedPosts(
   limit = 20,
   offset = 0,
   excludeId?: string,
+  town?: string,
 ): Promise<Post[]> {
   let query = supabase
     .from('posts')
@@ -91,6 +97,7 @@ export async function getApprovedPosts(
 
   if (category) query = query.eq('category', category)
   if (excludeId) query = query.neq('id', excludeId)
+  if (town) query = query.eq('town', town)
 
   const { data, error } = await query
   if (error) return []

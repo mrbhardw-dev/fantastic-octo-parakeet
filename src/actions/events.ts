@@ -3,9 +3,11 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
 import { getOrCreateProfileId } from '@/lib/profile'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import type { Event } from '@/types'
 
 const EventSchema = z.object({
@@ -38,6 +40,9 @@ export async function createEvent(formData: FormData) {
   const profileId = await getOrCreateProfileId(userId)
   if (!profileId) return { error: 'Could not resolve your profile. Please try signing out and back in.' }
 
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
   const { error } = await supabase.from('events').insert({
     title: parsed.data.title,
     description: parsed.data.description || null,
@@ -45,8 +50,8 @@ export async function createEvent(formData: FormData) {
     ends_at: parsed.data.ends_at || null,
     venue_name: parsed.data.venue_name || null,
     source_url: parsed.data.source_url || null,
-    town: 'Kilcock',
-    county: 'Kildare',
+    town: hood.town,
+    county: hood.county,
     status: 'pending',
     created_by: profileId,
   })
@@ -57,8 +62,8 @@ export async function createEvent(formData: FormData) {
   return { success: true }
 }
 
-export async function getUpcomingEvents(limit = 20): Promise<Event[]> {
-  const { data, error } = await supabase
+export async function getUpcomingEvents(limit = 20, town?: string): Promise<Event[]> {
+  let query = supabase
     .from('events')
     .select('*, profiles(display_name)')
     .eq('status', 'approved')
@@ -66,6 +71,9 @@ export async function getUpcomingEvents(limit = 20): Promise<Event[]> {
     .order('starts_at', { ascending: true })
     .limit(limit)
 
+  if (town) query = query.eq('town', town)
+
+  const { data, error } = await query
   if (error) return []
   return (data ?? []) as unknown as Event[]
 }

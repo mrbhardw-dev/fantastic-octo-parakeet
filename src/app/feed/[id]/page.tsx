@@ -1,12 +1,14 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { formatDistanceToNow, format } from 'date-fns'
 import { ArrowLeft, MapPin, ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import ReportButton from '@/components/feed/ReportButton'
 import { getPostById, getApprovedPosts } from '@/actions/posts'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
 import type { Metadata } from 'next'
 
@@ -37,9 +39,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { id } = await params
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
   const [post, morePosts] = await Promise.all([
     getPostById(id),
-    getApprovedPosts(undefined, 3, 0, id),
+    getApprovedPosts(undefined, 3, 0, id, hood.town),
   ])
   if (!post) notFound()
 

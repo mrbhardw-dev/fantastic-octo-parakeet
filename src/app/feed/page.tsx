@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { PenLine, AlertTriangle, ThumbsUp, Search, CalendarDays, Building2, HelpCircle, HandHeart, LayoutGrid } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PostCard from '@/components/feed/PostCard'
 import { getApprovedPosts } from '@/actions/posts'
 import { POST_CATEGORIES } from '@/types'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import type { Metadata } from 'next'
 import type { PostCategory } from '@/types'
 
@@ -13,7 +15,6 @@ export const metadata: Metadata = {
   description: 'Latest updates, alerts, recommendations, and news from the Kilcock community in Co. Kildare.',
   alternates: { canonical: 'https://baile.fyi/feed' },
 }
-export const revalidate = 60
 
 const CATEGORY_ICONS: Record<PostCategory, LucideIcon> = {
   Alert: AlertTriangle,
@@ -35,7 +36,10 @@ export default async function FeedPage({ searchParams }: Props) {
     ? (category as PostCategory)
     : undefined
 
-  const posts = await getApprovedPosts(validCategory)
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
+  const posts = await getApprovedPosts(validCategory, 20, 0, undefined, hood.town)
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
@@ -44,7 +48,7 @@ export default async function FeedPage({ searchParams }: Props) {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Local Feed</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Updates from Kilcock, Co. Kildare
+            Updates from {hood.name}, Co. {hood.county}
             {posts.length > 0 && (
               <span className="ml-1">· <span className="font-medium text-foreground">{posts.length}</span> {validCategory ? 'posts' : 'total'}</span>
             )}
@@ -95,7 +99,7 @@ export default async function FeedPage({ searchParams }: Props) {
 
       {/* Posts grid */}
       {posts.length === 0 ? (
-        <EmptyState category={validCategory} />
+        <EmptyState category={validCategory} neighbourhood={hood.name} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {posts.map((post) => (
@@ -107,7 +111,7 @@ export default async function FeedPage({ searchParams }: Props) {
   )
 }
 
-function EmptyState({ category }: { category?: string }) {
+function EmptyState({ category, neighbourhood }: { category?: string; neighbourhood: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -118,8 +122,8 @@ function EmptyState({ category }: { category?: string }) {
       </h2>
       <p className="text-muted-foreground text-sm max-w-xs mb-6">
         {category
-          ? `Be the first to post something in the ${category} category.`
-          : 'Be the first to share something with the Kilcock community.'}
+          ? `Be the first to post something in the ${category} category for ${neighbourhood}.`
+          : `Be the first to share something with the ${neighbourhood} community.`}
       </p>
       <Link href="/feed/new">
         <Button className="cursor-pointer">Post an update</Button>

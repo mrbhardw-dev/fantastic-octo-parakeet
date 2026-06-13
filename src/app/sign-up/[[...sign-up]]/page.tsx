@@ -74,7 +74,7 @@ export default async function SignUpPage() {
 
       {/* Right: Clerk form */}
       <div className="flex-1 flex items-center justify-center p-8 py-12 bg-background">
-        <SignUp routing="path" path="/sign-up" />
+        <SignUp routing="path" path="/sign-up" fallbackRedirectUrl="/api/auth/sync" />
       </div>
     </div>
   )

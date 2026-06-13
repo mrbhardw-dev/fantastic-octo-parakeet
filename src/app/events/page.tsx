@@ -1,8 +1,10 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { CalendarPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import EventCard from '@/components/events/EventCard'
 import { getUpcomingEvents } from '@/actions/events'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -10,10 +12,12 @@ export const metadata: Metadata = {
   description: 'Upcoming events in Kilcock, Co. Kildare — community gatherings, markets, sports, and more.',
   alternates: { canonical: 'https://baile.fyi/events' },
 }
-export const revalidate = 60
 
 export default async function EventsPage() {
-  const events = await getUpcomingEvents()
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
+  const events = await getUpcomingEvents(20, hood.town)
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
@@ -21,7 +25,7 @@ export default async function EventsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Upcoming Events</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            What&rsquo;s on in Kilcock, Co. Kildare
+            What&rsquo;s on in {hood.name}, Co. {hood.county}
             {events.length > 0 && (
               <span className="ml-1">· <span className="font-medium text-foreground">{events.length}</span> upcoming</span>
             )}
@@ -42,7 +46,9 @@ export default async function EventsPage() {
             <CalendarPlus size={28} className="text-muted-foreground" aria-hidden="true" />
           </div>
           <h2 className="text-lg font-semibold mb-2">No upcoming events</h2>
-          <p className="text-muted-foreground text-sm max-w-xs mb-6">Be the first to add an event for the Kilcock community.</p>
+          <p className="text-muted-foreground text-sm max-w-xs mb-6">
+            Be the first to add an event for {hood.name}.
+          </p>
           <Link href="/events/new"><Button className="cursor-pointer">Add an event</Button></Link>
         </div>
       ) : (

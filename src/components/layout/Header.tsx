@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import NeighbourhoodSwitcher from '@/components/NeighbourhoodSwitcher'
 
 const navLinks = [
   { href: '/feed',       label: 'Feed',        Icon: Rss },
@@ -57,6 +58,9 @@ export default function Header() {
             </span>
           </Link>
 
+          {/* Neighbourhood switcher */}
+          <NeighbourhoodSwitcher />
+
           {/* Desktop nav */}
           <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0.5">
             {navLinks.map(({ href, label, Icon }) => (
@@ -80,14 +84,9 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {!isSignedIn ? (
-              <>
-                <Link href="/sign-in">
-                  <Button variant="ghost" size="sm" className="cursor-pointer hidden sm:inline-flex">Sign in</Button>
-                </Link>
-                <Link href="/sign-up">
-                  <Button size="sm" className="cursor-pointer hidden sm:inline-flex">Join</Button>
-                </Link>
-              </>
+              <Link href="/sign-up" className="hidden sm:inline-flex">
+                <Button size="sm" className="cursor-pointer">Join the community</Button>
+              </Link>
             ) : (
               <UserButton />
             )}
@@ -128,12 +127,12 @@ export default function Header() {
               </Link>
             ))}
             {!isSignedIn && (
-              <div className="flex gap-2 pt-2">
-                <Link href="/sign-in" onClick={() => setMobileOpen(false)} className="flex-1">
-                  <Button variant="outline" size="sm" className="w-full cursor-pointer">Sign in</Button>
+              <div className="flex flex-col gap-2 pt-2">
+                <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
+                  <Button size="sm" className="w-full cursor-pointer">Join the community</Button>
                 </Link>
-                <Link href="/sign-up" onClick={() => setMobileOpen(false)} className="flex-1">
-                  <Button size="sm" className="w-full cursor-pointer">Join</Button>
+                <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full cursor-pointer text-muted-foreground">Already a member? Sign in</Button>
                 </Link>
               </div>
             )}

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import {
   PlusCircle, BookOpen, LayoutGrid,
   UtensilsCrossed, ShoppingBag, Wrench, Stethoscope,
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import DirectoryCard from '@/components/directory/DirectoryCard'
 import { getDirectoryListings } from '@/actions/directory'
 import { DIRECTORY_CATEGORIES } from '@/types'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import type { Metadata } from 'next'
 import type { DirectoryCategory } from '@/types'
 
@@ -17,7 +19,6 @@ export const metadata: Metadata = {
   description: 'Browse local businesses, tradespeople, clubs, and community groups in Kilcock, Co. Kildare.',
   alternates: { canonical: 'https://baile.fyi/directory' },
 }
-export const revalidate = 300
 
 const DIRECTORY_ICONS: Record<DirectoryCategory, LucideIcon> = {
   'Food & Drink':        UtensilsCrossed,
@@ -38,7 +39,10 @@ export default async function DirectoryPage({ searchParams }: Props) {
     ? (category as DirectoryCategory)
     : undefined
 
-  const listings = await getDirectoryListings(validCategory)
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
+  const listings = await getDirectoryListings(validCategory, 50, hood.town)
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
@@ -46,7 +50,7 @@ export default async function DirectoryPage({ searchParams }: Props) {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Local Directory</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Businesses, trades, and community groups in Kilcock
+            Businesses, trades, and community groups in {hood.name}
             {listings.length > 0 && (
               <span className="ml-1">· <span className="font-medium text-foreground">{listings.length}</span> listed</span>
             )}
@@ -104,7 +108,7 @@ export default async function DirectoryPage({ searchParams }: Props) {
             {validCategory ? `No ${validCategory} listings yet` : 'No listings yet'}
           </h2>
           <p className="text-muted-foreground text-sm max-w-xs mb-6">
-            Be the first to add a local business or service to the directory.
+            Be the first to add a local business or service to the {hood.name} directory.
           </p>
           <Link href="/directory/new"><Button className="cursor-pointer">Add a listing</Button></Link>
         </div>

@@ -59,7 +59,7 @@ export default function SignInPage() {
 
       {/* Right: Clerk form */}
       <div className="flex-1 flex items-center justify-center p-8 py-12 bg-background">
-        <SignIn routing="path" path="/sign-in" />
+        <SignIn routing="path" path="/sign-in" fallbackRedirectUrl="/api/auth/sync" />
       </div>
     </div>
   )

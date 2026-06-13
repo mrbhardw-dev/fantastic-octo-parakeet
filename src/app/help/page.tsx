@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { HandHeart, AlertTriangle, PlusCircle, LifeBuoy, Users, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import ReportButton from '@/components/feed/ReportButton'
 import { getHelpPosts } from '@/actions/help'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import { formatDistanceToNow } from 'date-fns'
 import type { Metadata } from 'next'
 import type { HelpType } from '@/types'
@@ -14,14 +16,17 @@ export const metadata: Metadata = {
   description: 'Ask for help or offer support to your neighbours in Kilcock, Co. Kildare.',
   alternates: { canonical: 'https://baile.fyi/help' },
 }
-export const revalidate = 60
 
 interface Props { searchParams: Promise<{ type?: string }> }
 
 export default async function HelpPage({ searchParams }: Props) {
   const { type } = await searchParams
   const validType = type === 'need' || type === 'offer' ? type as HelpType : undefined
-  const posts = await getHelpPosts(validType)
+
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
+  const posts = await getHelpPosts(validType, hood.town)
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
@@ -29,7 +34,7 @@ export default async function HelpPage({ searchParams }: Props) {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Neighbour Help Board</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Ask for help or offer support in Kilcock
+            Ask for help or offer support in {hood.name}
             {posts.length > 0 && (
               <span className="ml-1">· <span className="font-medium text-foreground">{posts.length}</span> active</span>
             )}
@@ -93,7 +98,9 @@ export default async function HelpPage({ searchParams }: Props) {
             <HandHeart size={28} className="text-muted-foreground" aria-hidden="true" />
           </div>
           <h2 className="text-lg font-semibold mb-2">No posts yet</h2>
-          <p className="text-muted-foreground text-sm max-w-xs mb-6">Be the first to ask for help or offer support to the community.</p>
+          <p className="text-muted-foreground text-sm max-w-xs mb-6">
+            Be the first to ask for help or offer support to the {hood.name} community.
+          </p>
           <Link href="/help/new"><Button className="cursor-pointer">Post on the board</Button></Link>
         </div>
       ) : (

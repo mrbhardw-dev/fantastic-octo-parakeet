@@ -3,9 +3,11 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
 import { getOrCreateProfileId } from '@/lib/profile'
+import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import type { HelpPost, HelpType } from '@/types'
 
 const HelpSchema = z.object({
@@ -32,12 +34,15 @@ export async function createHelpPost(formData: FormData) {
   const profileId = await getOrCreateProfileId(userId)
   if (!profileId) return { error: 'Could not resolve your profile. Please try signing out and back in.' }
 
+  const cookieStore = await cookies()
+  const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
+
   const { error } = await supabase.from('help_posts').insert({
     type: parsed.data.type,
     title: parsed.data.title,
     body: parsed.data.body,
-    town: 'Kilcock',
-    county: 'Kildare',
+    town: hood.town,
+    county: hood.county,
     status: 'pending',
     created_by: profileId,
   })
@@ -48,7 +53,7 @@ export async function createHelpPost(formData: FormData) {
   return { success: true }
 }
 
-export async function getHelpPosts(type?: HelpType): Promise<HelpPost[]> {
+export async function getHelpPosts(type?: HelpType, town?: string): Promise<HelpPost[]> {
   let query = supabase
     .from('help_posts')
     .select('*, profiles(display_name)')
@@ -57,6 +62,7 @@ export async function getHelpPosts(type?: HelpType): Promise<HelpPost[]> {
     .limit(50)
 
   if (type) query = query.eq('type', type)
+  if (town) query = query.eq('town', town)
 
   const { data, error } = await query
   if (error) return []
