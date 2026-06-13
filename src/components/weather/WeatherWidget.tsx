@@ -1,5 +1,6 @@
 import { Sun, Cloud, CloudRain, CloudSnow, CloudLightning, Droplets, Wind } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface OpenMeteoResponse {
   current: {
@@ -20,7 +21,7 @@ function getWeather(code: number): { label: string; Icon: LucideIcon } {
   return                  { label: 'Thunderstorm',   Icon: CloudLightning }
 }
 
-export default async function WeatherWidget() {
+export default async function WeatherWidget({ className }: { className?: string }) {
   try {
     const res = await fetch(
       'https://api.open-meteo.com/v1/forecast?latitude=53.3956&longitude=-6.7817&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FDublin',
@@ -36,17 +37,19 @@ export default async function WeatherWidget() {
         href="https://www.met.ie/forecasts/county-forecast/results?id=KI"
         target="_blank"
         rel="noopener noreferrer"
-        title="Full Kildare forecast on Met Éireann"
-        className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card px-4 py-1.5 text-sm shadow-sm hover:border-primary/40 hover:shadow-md transition-all duration-150 cursor-pointer"
-        aria-label={`Current weather in Kilcock: ${Math.round(temperature_2m)}°C, ${label}, wind ${Math.round(windspeed_10m)} km/h`}
+        className={cn(
+          "bg-white border border-border px-4 py-2.5 rounded-full shadow-sm flex items-center gap-3 animate-float hover:shadow-md transition-shadow cursor-pointer",
+          className
+        )}
+        aria-label={`Weather in Kilcock: ${Math.round(temperature_2m)}°C, ${label}`}
       >
-        <Icon size={15} className="text-primary shrink-0" aria-hidden="true" />
-        <span className="font-semibold text-foreground">{Math.round(temperature_2m)}°C</span>
-        <span className="text-muted-foreground">{label}</span>
-        <span className="hidden sm:inline text-muted-foreground border-l border-border pl-2.5">
-          <Wind size={12} className="inline mr-1" aria-hidden="true" />
-          {Math.round(windspeed_10m)} km/h
-        </span>
+        <Icon size={20} className="text-accent shrink-0" aria-hidden="true" />
+        <div className="text-left">
+          <p className="text-[10px] font-bold text-muted-foreground leading-none uppercase tracking-widest">Kilcock Now</p>
+          <p className="text-sm font-bold text-foreground leading-none mt-1">
+            {Math.round(temperature_2m)}°C · {label}
+          </p>
+        </div>
       </a>
     )
   } catch {

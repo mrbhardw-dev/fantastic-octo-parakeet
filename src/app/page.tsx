@@ -1,327 +1,287 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
-import { formatDistanceToNow } from 'date-fns'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import WeatherWidget from '@/components/weather/WeatherWidget'
-import TopContributors from '@/components/feed/TopContributors'
 import { getCommunityStats } from '@/actions/stats'
 import { getApprovedPosts } from '@/actions/posts'
-import { getTopContributors } from '@/actions/reactions'
 import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
-import { CATEGORY_COLORS, CATEGORY_ACCENT } from '@/types'
+import PostCard from '@/components/feed/PostCard'
 import {
-  Rss,
-  CalendarDays,
-  BookOpen,
-  HandHeart,
   MapPin,
-  ShieldCheck,
-  Users,
   ArrowRight,
-  PenLine,
-  Clock,
-  MessageSquare,
-  Building2,
+  Search,
+  Cake,
+  CalendarDays,
+  Newspaper,
+  HeartHandshake,
+  ArrowUpRight,
+  ChevronRight,
+  Home,
+  Clover,
+  Building2
 } from 'lucide-react'
 
 export default async function HomePage() {
   const cookieStore = await cookies()
   const hood = getNeighbourhood(cookieStore.get(COOKIE_NAME)?.value ?? 'kilcock')
 
-  const [stats, recentPosts, topContributors] = await Promise.all([
+  const [stats, recentPosts] = await Promise.all([
     getCommunityStats(hood.town),
     getApprovedPosts(undefined, 3, 0, undefined, hood.town),
-    getTopContributors(hood.town, 5),
   ])
 
   return (
-    <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-secondary/30 to-background py-20 px-4 sm:py-28">
-        {/* Decorative dot-grid */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07] dark:opacity-[0.05]"
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative pt-24 pb-32 px-4">
+        {/* Background Decorative Blob */}
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[100px] pointer-events-none -z-10" aria-hidden="true" />
+        
+        <div className="max-w-7xl mx-auto relative">
+          {/* Floating Notices (Desktop Only) */}
+          <div className="hidden lg:block absolute -left-20 top-10 w-64 p-6 bg-white rounded-2xl floating-notice -rotate-6 z-0 border border-border/50">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-primary">
+                <Search size={14} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Lost & Found</span>
+            </div>
+            <p className="text-sm font-bold text-foreground leading-snug">Black Labrador puppy seen near the harbor...</p>
+          </div>
+
+          <div className="hidden lg:block absolute -right-10 top-40 w-72 p-6 bg-white rounded-2xl floating-notice rotate-3 z-0 border border-border/50">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-accent">
+                <Cake size={14} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Local Event</span>
+            </div>
+            <p className="text-sm font-bold text-foreground leading-snug">Bake Sale tomorrow at the Parish Hall. 10am-2pm.</p>
+          </div>
+
+          {/* Main Hero Pill */}
+          <div className="relative z-10 hero-pill p-12 md:p-24 text-center max-w-4xl mx-auto overflow-visible">
+            {/* Integrated Weather Widget */}
+            <WeatherWidget className="absolute -top-6 right-12 hidden md:flex scale-110" />
+
+            <div className="mb-8 flex justify-center items-center gap-3 text-primary/60">
+              <MapPin size={16} aria-hidden="true" />
+              <span className="text-xs font-bold tracking-[0.2em] uppercase">{hood.name}, Co. {hood.county}</span>
+            </div>
+
+            <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-foreground mb-8 leading-[1]">
+              Your home town.<br />
+              <span className="text-primary italic">Your home page.</span>
+            </h1>
+
+            <p className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto mb-14 font-medium leading-relaxed">
+              baile /bal-uh/ &middot; Irish for home, place &amp; belonging.<br />
+              The community noticeboard for residents, clubs, and neighbours.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+              <Link href="/feed" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full rounded-full font-black px-12 py-8 text-xl shadow-xl shadow-primary/20 hover-bounce">
+                  Browse local feed
+                </Button>
+              </Link>
+              <Link href="/feed/new" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full bg-white border-2 border-primary text-primary rounded-full font-black px-12 py-8 text-xl hover:bg-secondary">
+                  Post an update
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section with Overlapping Circles */}
+      <section className="py-28 relative overflow-hidden">
+        <div 
+          className="absolute inset-0 opacity-[0.05] pointer-events-none grayscale brightness-50" 
+          style={{ 
+            backgroundImage: "url('https://images.unsplash.com/photo-1775229781684-377f9cdf80ae?auto=format&w=1200&q=80&fit=crop')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }} 
           aria-hidden="true"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #166534 1.5px, transparent 1.5px)',
-            backgroundSize: '28px 28px',
-          }}
         />
-        {/* Decorative glow blobs */}
-        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-
-        <div className="relative mx-auto max-w-3xl text-center">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
-            <MapPin size={14} aria-hidden="true" />
-            {hood.name}, Co. {hood.county}
-          </div>
-          <p className="text-xs text-primary/60 font-medium tracking-[0.2em] uppercase mb-5">
-            baile /bal-uh/ · Irish for home, place &amp; belonging
-          </p>
-          <div className="mb-7 flex justify-center">
-            <WeatherWidget />
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-[1.1]">
-            Your home town.<br />
-            <span className="relative text-primary">
-              Your home page.
-              <span
-                className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-primary/30"
-                aria-hidden="true"
-              />
-            </span>
-          </h1>
-          <p className="mt-7 text-lg leading-relaxed text-muted-foreground max-w-xl mx-auto">
-            The community noticeboard for {hood.name} — a shared home page for residents,
-            businesses, clubs, and neighbours to share what matters on your doorstep.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link href="/feed">
-              <Button
-                size="lg"
-                className="cursor-pointer gap-2 min-h-[44px] shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow duration-200"
-              >
-                <Rss size={18} aria-hidden="true" />
-                Browse local feed
-              </Button>
-            </Link>
-            <Link href="/feed/new">
-              <Button size="lg" variant="outline" className="cursor-pointer gap-2 min-h-[44px]">
-                <PenLine size={18} aria-hidden="true" />
-                Post an update
-              </Button>
-            </Link>
-            <Link href="/events">
-              <Button size="lg" variant="outline" className="cursor-pointer gap-2 min-h-[44px]">
-                <CalendarDays size={18} aria-hidden="true" />
-                See events
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Activity stats strip */}
-      <section className="border-y border-border bg-muted/30 py-5 px-4" aria-label="Community activity">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <MessageSquare size={16} aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{stats.posts}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Community posts</p>
-              </div>
+        
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-0 md:-space-x-12">
+            {/* Posts Stat */}
+            <div className="w-52 h-52 rounded-full bg-white border-4 border-secondary shadow-2xl flex flex-col items-center justify-center z-10 transform hover:scale-110 transition-transform duration-500">
+              <span className="text-5xl font-black text-primary font-mono leading-none tracking-tighter">{stats.posts.toLocaleString()}</span>
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-3">Total Posts</span>
             </div>
-            <div className="h-8 w-px bg-border hidden sm:block" aria-hidden="true" />
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-                <CalendarDays size={16} aria-hidden="true" />
+            
+            {/* Events Stat (Center, Larger) */}
+            <div className="w-64 h-64 rounded-full bg-secondary border-4 border-white shadow-2xl flex flex-col items-center justify-center z-20 relative transform hover:scale-105 transition-transform duration-500">
+              <div className="absolute -top-4 -right-4 w-14 h-14 bg-accent rounded-full flex items-center justify-center text-white text-2xl animate-pulse shadow-lg">
+                <CalendarDays size={28} />
               </div>
-              <div>
-                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{stats.events}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Upcoming events</p>
-              </div>
+              <span className="text-7xl font-black text-primary font-mono leading-none tracking-tighter">{stats.events}</span>
+              <span className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-3">Live Events</span>
             </div>
-            <div className="h-8 w-px bg-border hidden sm:block" aria-hidden="true" />
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                <Building2 size={16} aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-foreground tabular-nums leading-none">{stats.businesses}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Local businesses</p>
-              </div>
+            
+            {/* Businesses Stat */}
+            <div className="w-52 h-52 rounded-full bg-white border-4 border-secondary shadow-2xl flex flex-col items-center justify-center z-10 transform hover:scale-110 transition-transform duration-500">
+              <span className="text-5xl font-black text-primary font-mono leading-none tracking-tighter">{stats.businesses}+</span>
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-3">Businesses</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Latest from the community */}
-      {recentPosts.length > 0 && (
-        <section className="py-14 px-4">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex items-center justify-between mb-7">
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Latest from the community</h2>
-                <p className="text-sm text-muted-foreground mt-1">What your neighbours are sharing right now</p>
-              </div>
-              <Link
-                href="/feed"
-                className="flex items-center gap-1 text-sm font-medium text-primary hover:underline underline-offset-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-              >
-                See all <ArrowRight size={14} aria-hidden="true" />
-              </Link>
+      {/* Latest Feed Section */}
+      <section className="py-32 bg-secondary/30 border-y border-border px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+            <div className="space-y-2">
+              <h2 className="text-4xl font-black tracking-tighter text-foreground">Pinned from the community</h2>
+              <p className="text-muted-foreground text-lg font-medium">What your neighbours are talking about today in {hood.name}</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {recentPosts.map((post) => {
-                const colorClass = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-800'
-                const accentClass = CATEGORY_ACCENT[post.category] ?? 'border-l-gray-300'
-                const ago = formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
-                return (
-                  <Link
-                    key={post.id}
-                    href={`/feed/${post.id}`}
-                    className="group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
-                  >
-                    <Card className={`h-full transition-all duration-200 group-hover:shadow-lg group-hover:-translate-y-1 border-l-4 ${accentClass}`}>
-                      <CardContent className="p-4 flex flex-col h-full">
-                        <Badge className={`${colorClass} border text-xs font-medium mb-3 self-start`} variant="outline">
-                          {post.category}
-                        </Badge>
-                        <h3 className="font-semibold text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-150 mb-2 leading-snug">
-                          {post.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed flex-1">
-                          {post.body}
-                        </p>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
-                          <Clock size={10} aria-hidden="true" />
-                          {ago}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                )
-              })}
-            </div>
+            <Link href="/feed" className="text-primary text-lg font-black hover:underline underline-offset-8 flex items-center gap-2 group">
+              Explore the board <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+            </Link>
           </div>
-        </section>
-      )}
 
-      {/* Community Stars */}
-      <TopContributors contributors={topContributors} />
-
-      {/* Features */}
-      <section className={`py-16 px-4 ${recentPosts.length > 0 || topContributors.length > 0 ? 'bg-muted/20' : ''}`}>
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-bold text-center text-foreground mb-3">
-            Everything happening in Kilcock
-          </h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-lg mx-auto">
-            One place for local news, events, businesses, and community support.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {features.map((f) => (
-              <Link key={f.href} href={f.href} className="cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
-                <Card className="h-full transition-all duration-200 group-hover:shadow-md group-hover:border-primary/40 group-hover:-translate-y-0.5">
-                  <CardContent className="p-6">
-                    <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${f.bgColor} ${f.textColor}`}>
-                      <f.icon size={22} aria-hidden="true" />
-                    </div>
-                    <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
-                    <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary">
-                      Browse <ArrowRight size={14} aria-hidden="true" className="transition-transform duration-150 group-hover:translate-x-0.5" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {recentPosts.map((post, idx) => (
+              <PostCard key={post.id} post={post} index={idx} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Trust section */}
-      <section className="py-14 px-4 bg-muted/40">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {trust.map((t) => (
-              <div key={t.title} className="flex flex-col items-center text-center sm:flex-row sm:text-left gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <t.icon size={24} aria-hidden="true" />
+      {/* Explore Bento Grid */}
+      <section className="py-32 px-4 relative">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20 space-y-4">
+            <h2 className="text-5xl font-black tracking-tighter">Explore {hood.name}</h2>
+            <p className="text-muted-foreground text-xl max-w-xl mx-auto font-medium">Everything you need to stay connected with your village life, all in one place.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[640px]">
+            {/* Community Board (Large Hero Tile) */}
+            <Link href="/feed" className="md:col-span-2 bg-secondary/50 rounded-[2.5rem] p-12 border border-primary/5 flex flex-col justify-between hover:bg-secondary hover:shadow-2xl transition-all group overflow-hidden relative">
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-white rounded-[1.25rem] flex items-center justify-center text-primary mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                  <Newspaper size={36} />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">{t.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{t.description}</p>
+                <h3 className="text-3xl font-black mb-4 tracking-tighter">Community Board</h3>
+                <p className="text-foreground/60 text-lg max-w-xs font-medium leading-snug">The pulse of the village. Alerts, news, and daily updates.</p>
+              </div>
+              <div className="inline-flex items-center gap-3 text-lg font-black text-primary group-hover:gap-5 transition-all relative z-10">
+                Enter Board <ArrowUpRight size={24} />
+              </div>
+            </Link>
+
+            {/* Village Events (Tall Tile) */}
+            <Link href="/events" className="md:row-span-2 bg-purple-50 rounded-[2.5rem] p-12 border border-purple-100 flex flex-col justify-between hover:bg-purple-100/50 hover:shadow-2xl transition-all group overflow-hidden relative">
+              <div className="absolute -right-24 -bottom-24 w-80 h-80 opacity-[0.03] text-purple-900 pointer-events-none group-hover:scale-110 group-hover:rotate-6 transition-transform">
+                <CalendarDays size={320} />
+              </div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-white rounded-[1.25rem] flex items-center justify-center text-purple-600 mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                  <CalendarDays size={36} />
+                </div>
+                <h3 className="text-3xl font-black mb-4 tracking-tighter">Village Events</h3>
+                <p className="text-foreground/60 text-lg font-medium leading-snug">Festivals, clubs, matches, and markets happening nearby.</p>
+              </div>
+              <div className="inline-flex items-center gap-3 text-lg font-black text-purple-600 group-hover:gap-5 transition-all relative z-10">
+                See Calendar <ArrowUpRight size={24} />
+              </div>
+            </Link>
+
+            {/* Help Out (Small Tile) */}
+            <Link href="/help" className="bg-amber-50 rounded-[2.5rem] p-10 border border-amber-100 hover:shadow-2xl transition-all group">
+              <div className="w-14 h-14 bg-white rounded-[1rem] flex items-center justify-center text-accent mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                <HeartHandshake size={28} />
+              </div>
+              <h3 className="text-2xl font-black mb-3 tracking-tighter">Help Out</h3>
+              <p className="text-sm text-foreground/60 mb-6 font-medium leading-relaxed text-balance">Offer a hand or ask for one from your neighbours.</p>
+              <div className="text-sm font-black text-accent flex items-center gap-2 group-hover:gap-3 transition-all">Browse <ChevronRight size={16} /></div>
+            </Link>
+
+            {/* Directory (Small Tile) */}
+            <Link href="/directory" className="bg-blue-50 rounded-[2.5rem] p-10 border border-blue-100 hover:shadow-2xl transition-all group">
+              <div className="w-14 h-14 bg-white rounded-[1rem] flex items-center justify-center text-blue-600 mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                <Building2 size={28} />
+              </div>
+              <h3 className="text-2xl font-black mb-3 tracking-tighter">Directory</h3>
+              <p className="text-sm text-foreground/60 mb-6 font-medium leading-relaxed text-balance">Find local shops, trades, and services in {hood.name}.</p>
+              <div className="text-sm font-black text-blue-600 flex items-center gap-2 group-hover:gap-3 transition-all">Search <ChevronRight size={16} /></div>
+            </Link>
+
+            {/* CTA Tile (Primary Color) */}
+            <div className="md:col-span-1 bg-primary rounded-[2.5rem] p-10 flex flex-col items-center justify-center text-center text-white relative overflow-hidden group">
+              <div className="z-10 relative">
+                <h4 className="font-black text-2xl mb-6 tracking-tighter leading-tight">Your town needs you!</h4>
+                <Link href="/sign-up">
+                  <Button variant="secondary" size="lg" className="rounded-full font-black px-8 py-6 hover-bounce text-primary shadow-xl shadow-black/10">
+                    Join Baile
+                  </Button>
+                </Link>
+              </div>
+              <div className="absolute inset-0 opacity-10 pointer-events-none p-4 flex items-center justify-center group-hover:scale-125 transition-transform duration-1000">
+                 <Home size={180} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final Join CTA */}
+      <section className="py-40 px-4 relative overflow-hidden bg-white">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at center, var(--secondary) 0%, var(--background) 70%)' }} aria-hidden="true" />
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="mb-12 flex justify-center">
+            <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center shadow-2xl shadow-accent/30 animate-float text-white border-4 border-white">
+              <Home size={48} strokeWidth={2.5} />
+            </div>
+          </div>
+          
+          <p className="text-[10px] font-black tracking-[0.5em] uppercase text-primary/60 mb-6">tar abhaile &middot; come home</p>
+          <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-foreground mb-10 leading-[0.9]">Ready to join the village?</h2>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-16 max-w-2xl mx-auto font-medium leading-relaxed">
+            It's completely free, moderated for safety, and run by residents for residents. No ads, no tracking&mdash;just {hood.name}.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-24">
+            <Link href="/sign-up" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full px-16 py-10 rounded-full font-black text-2xl shadow-2xl shadow-primary/30 hover-bounce">
+                Create free account
+              </Button>
+            </Link>
+            <Link href="/feed" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full px-16 py-10 bg-transparent text-foreground border-4 border-foreground/5 rounded-full font-black text-2xl hover:bg-white transition-all">
+                Explore as guest
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trust Pillars */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left border-t border-border/50 pt-20">
+            {[
+              { title: 'Moderated', desc: 'Every post is reviewed by local volunteers for safety.' },
+              { title: 'Hyper-Local', desc: `Tailored specifically for ${hood.name} residents only.` },
+              { title: 'Community Owned', desc: 'For residents, by residents. Zero advertising.' }
+            ].map((pillar) => (
+              <div key={pillar.title} className="flex gap-5">
+                <div className="w-12 h-12 shrink-0 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm">
+                  <Clover size={28} strokeWidth={2.5} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-black text-xl tracking-tight">{pillar.title}</h4>
+                  <p className="text-sm text-muted-foreground font-medium leading-relaxed">{pillar.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      {/* Join CTA */}
-      <section className="py-20 px-4 bg-primary text-primary-foreground">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-primary-foreground/50 text-xs font-medium tracking-[0.2em] uppercase mb-3">
-            tar abhaile · come home
-          </p>
-          <h2 className="text-3xl font-bold mb-4">Come home to your community</h2>
-          <p className="text-primary-foreground/80 text-lg mb-8 leading-relaxed">
-            It&rsquo;s free to join. Sign up to post updates, add events, and connect
-            with the people of Kilcock — your home page is waiting.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/sign-up">
-              <Button size="lg" variant="secondary" className="cursor-pointer min-h-[44px] font-semibold">
-                Create a free account
-              </Button>
-            </Link>
-            <Link href="/feed">
-              <Button size="lg" variant="outline" className="cursor-pointer min-h-[44px] border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-                Browse without signing in
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-    </>
+    </div>
   )
 }
-
-const features = [
-  {
-    href: '/feed',
-    icon: Rss,
-    title: 'Local Feed',
-    description: 'Alerts, recommendations, lost & found, and news from your neighbours in Kilcock.',
-    bgColor: 'bg-primary/10',
-    textColor: 'text-primary',
-  },
-  {
-    href: '/events',
-    icon: CalendarDays,
-    title: 'Events',
-    description: "Discover and share what's happening in Kilcock and the surrounding area.",
-    bgColor: 'bg-purple-100 dark:bg-purple-900/30',
-    textColor: 'text-purple-600 dark:text-purple-400',
-  },
-  {
-    href: '/directory',
-    icon: BookOpen,
-    title: 'Local Directory',
-    description: 'Browse local businesses, tradespeople, clubs, and community groups.',
-    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-    textColor: 'text-blue-600 dark:text-blue-400',
-  },
-  {
-    href: '/help',
-    icon: HandHeart,
-    title: 'Neighbour Help',
-    description: 'Ask for help or offer a hand to someone in your community.',
-    bgColor: 'bg-amber-100 dark:bg-amber-900/30',
-    textColor: 'text-amber-600 dark:text-amber-400',
-  },
-]
-
-const trust = [
-  {
-    icon: ShieldCheck,
-    title: 'Moderated content',
-    description: 'All posts are reviewed before publishing to keep the community safe and relevant.',
-  },
-  {
-    icon: MapPin,
-    title: 'Built for your area',
-    description: 'Each community gets its own noticeboard. Starting with Kilcock — more Irish towns joining soon.',
-  },
-  {
-    icon: Users,
-    title: 'Community-run',
-    description: 'For residents, by residents. No advertising, no tracking, no nonsense.',
-  },
-]

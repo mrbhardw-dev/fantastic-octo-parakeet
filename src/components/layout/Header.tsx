@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth, UserButton } from '@clerk/nextjs'
-import { Menu, X, Leaf, Rss, CalendarDays, BookOpen, HandHeart, Shield, Sun, Moon } from 'lucide-react'
+import { Menu, X, Clover, Rss, CalendarDays, BookOpen, HandHeart, Shield, Sun, Moon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
@@ -28,9 +28,9 @@ function ThemeToggle() {
       type="button"
       aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-      className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
-      {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+      {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
     </button>
   )
 }
@@ -41,19 +41,19 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-md">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+            className="flex items-center gap-2.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md group"
             aria-label="baile.fyi home"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground" aria-hidden="true">
-              <Leaf size={16} strokeWidth={2.5} />
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground group-hover:rotate-3 transition-transform" aria-hidden="true">
+              <Clover size={20} strokeWidth={2.5} />
             </span>
-            <span className="text-xl font-bold tracking-tight text-foreground">
+            <span className="text-xl font-bold tracking-tighter text-foreground">
               baile<span className="text-primary">.fyi</span>
             </span>
           </Link>
@@ -62,16 +62,16 @@ export default function Header() {
           <NeighbourhoodSwitcher />
 
           {/* Desktop nav */}
-          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0.5">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1">
             {navLinks.map(({ href, label, Icon }) => (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                   pathname.startsWith(href)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary',
                 )}
               >
                 <Icon size={14} aria-hidden="true" />
@@ -85,7 +85,7 @@ export default function Header() {
             <ThemeToggle />
             {!isSignedIn ? (
               <Link href="/sign-up" className="hidden sm:inline-flex">
-                <Button size="sm" className="cursor-pointer">Join the community</Button>
+                <Button size="sm" className="rounded-full font-bold cursor-pointer hover-bounce">Join Village</Button>
               </Link>
             ) : (
               <UserButton />
@@ -98,9 +98,9 @@ export default function Header() {
               aria-expanded={mobileOpen}
               aria-controls="mobile-nav"
               onClick={() => setMobileOpen((v) => !v)}
-              className="md:hidden flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="md:hidden flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -108,31 +108,28 @@ export default function Header() {
 
       {/* Mobile nav drawer */}
       {mobileOpen && (
-        <div id="mobile-nav" className="md:hidden border-t border-border bg-card">
-          <nav aria-label="Mobile navigation" className="mx-auto max-w-6xl px-4 py-3 flex flex-col gap-1">
+        <div id="mobile-nav" className="md:hidden border-t border-border bg-background p-4 flex flex-col gap-2">
+          <nav aria-label="Mobile navigation" className="flex flex-col gap-1">
             {navLinks.map(({ href, label, Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'flex items-center gap-2 px-3 py-3 rounded-md text-sm font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[44px]',
+                  'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer min-h-[48px]',
                   pathname.startsWith(href)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary',
                 )}
               >
-                <Icon size={15} aria-hidden="true" />
+                <Icon size={16} aria-hidden="true" />
                 {label}
               </Link>
             ))}
             {!isSignedIn && (
-              <div className="flex flex-col gap-2 pt-2">
+              <div className="flex flex-col gap-2 pt-4">
                 <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
-                  <Button size="sm" className="w-full cursor-pointer">Join the community</Button>
-                </Link>
-                <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
-                  <Button variant="ghost" size="sm" className="w-full cursor-pointer text-muted-foreground">Already a member? Sign in</Button>
+                  <Button size="lg" className="w-full rounded-xl font-bold cursor-pointer">Join the community</Button>
                 </Link>
               </div>
             )}

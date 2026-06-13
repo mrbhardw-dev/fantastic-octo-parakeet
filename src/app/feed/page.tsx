@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
-import { PenLine, AlertTriangle, ThumbsUp, Search, CalendarDays, Building2, HelpCircle, HandHeart, LayoutGrid } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Pencil, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PostCard from '@/components/feed/PostCard'
 import { getApprovedPosts } from '@/actions/posts'
@@ -9,21 +8,11 @@ import { POST_CATEGORIES } from '@/types'
 import { getNeighbourhood, COOKIE_NAME } from '@/lib/neighbourhoods'
 import type { Metadata } from 'next'
 import type { PostCategory } from '@/types'
+import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Local Feed',
-  description: 'Latest updates, alerts, recommendations, and news from the Kilcock community in Co. Kildare.',
-  alternates: { canonical: 'https://baile.fyi/feed' },
-}
-
-const CATEGORY_ICONS: Record<PostCategory, LucideIcon> = {
-  Alert: AlertTriangle,
-  Recommendation: ThumbsUp,
-  'Lost & Found': Search,
-  Event: CalendarDays,
-  'Local Business': Building2,
-  Question: HelpCircle,
-  'Community Help': HandHeart,
+  description: 'Latest updates, alerts, recommendations, and news from the Kilcock community.',
 }
 
 interface Props {
@@ -42,92 +31,109 @@ export default async function FeedPage({ searchParams }: Props) {
   const posts = await getApprovedPosts(validCategory, 20, 0, undefined, hood.town)
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Local Feed</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Updates from {hood.name}, Co. {hood.county}
-            {posts.length > 0 && (
-              <span className="ml-1">· <span className="font-medium text-foreground">{posts.length}</span> {validCategory ? 'posts' : 'total'}</span>
-            )}
-          </p>
-        </div>
-        <Link href="/feed/new">
-          <Button className="cursor-pointer gap-2 min-h-[44px]">
-            <PenLine size={16} aria-hidden="true" />
-            <span className="hidden sm:inline">Post an update</span>
-            <span className="sm:hidden">Post</span>
-          </Button>
-        </Link>
-      </div>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background Decorative Blobs */}
+      <div className="blob-bg top-[-10%] left-[-5%] w-[500px] h-[500px] bg-secondary rounded-full" aria-hidden="true" />
+      <div className="blob-bg bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-accent/10 rounded-full" aria-hidden="true" />
 
-      {/* Category filter */}
-      <div className="flex gap-2 flex-wrap mb-8" role="group" aria-label="Filter by category">
-        <Link href="/feed">
-          <button
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[36px] ${
-              !validCategory
-                ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
-            }`}
-          >
-            <LayoutGrid size={13} aria-hidden="true" />
-            All
-          </button>
-        </Link>
-        {POST_CATEGORIES.map((cat) => {
-          const Icon = CATEGORY_ICONS[cat]
-          const isActive = validCategory === cat
-          return (
-            <Link key={cat} href={`/feed?category=${encodeURIComponent(cat)}`}>
+      <header className="pt-16 pb-8 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-black tracking-[0.2em] uppercase">
+              <MapPin size={12} /> {hood.name}, Co. {hood.county}
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground">
+              Local <span className="text-primary italic">Feed</span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-xl font-medium leading-relaxed">
+              Pinned updates, alerts, and stories from your neighbours in the heart of the village.
+            </p>
+          </div>
+          
+          <Link href="/feed/new">
+            <Button className="group relative inline-flex items-center justify-center gap-3 px-10 py-8 bg-primary text-white font-black rounded-full transition-all hover:scale-105 shadow-2xl shadow-primary/20 text-xl hover-bounce">
+              <Pencil size={24} className="transition-transform group-hover:rotate-12" />
+              Post an update
+            </Button>
+          </Link>
+        </div>
+      </header>
+
+      {/* Sticky Category Filter Bar */}
+      <nav className="sticky top-16 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 py-6 px-6 mb-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 md:pb-0">
+            <Link href="/feed">
               <button
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[36px] ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                    : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
-                }`}
+                className={cn(
+                  "whitespace-nowrap px-8 py-3.5 rounded-full font-black text-sm transition-all shadow-sm",
+                  !validCategory
+                    ? "bg-accent text-accent-foreground scale-105"
+                    : "bg-white border border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                )}
               >
-                <Icon size={13} aria-hidden="true" />
-                {cat}
+                All Notices
               </button>
             </Link>
-          )
-        })}
-      </div>
-
-      {/* Posts grid */}
-      {posts.length === 0 ? (
-        <EmptyState category={validCategory} neighbourhood={hood.name} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
+            {POST_CATEGORIES.map((cat) => {
+              const isActive = validCategory === cat
+              return (
+                <Link key={cat} href={`/feed?category=${encodeURIComponent(cat)}`}>
+                  <button
+                    className={cn(
+                      "whitespace-nowrap px-8 py-3.5 rounded-full font-black text-sm transition-all",
+                      isActive
+                        ? "bg-accent text-accent-foreground shadow-lg scale-105"
+                        : "bg-white border border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                    )}
+                  >
+                    {cat}
+                  </button>
+                </Link>
+              )
+            })}
+          </div>
         </div>
-      )}
-    </div>
-  )
-}
+      </nav>
 
-function EmptyState({ category, neighbourhood }: { category?: string; neighbourhood: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-        <PenLine size={28} className="text-muted-foreground" aria-hidden="true" />
-      </div>
-      <h2 className="text-lg font-semibold text-foreground mb-2">
-        {category ? `No ${category} posts yet` : 'No posts yet'}
-      </h2>
-      <p className="text-muted-foreground text-sm max-w-xs mb-6">
-        {category
-          ? `Be the first to post something in the ${category} category for ${neighbourhood}.`
-          : `Be the first to share something with the ${neighbourhood} community.`}
-      </p>
-      <Link href="/feed/new">
-        <Button className="cursor-pointer">Post an update</Button>
-      </Link>
+      <main className="px-6 pb-40">
+        <div className="max-w-6xl mx-auto">
+          {posts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-40 text-center bg-white/40 backdrop-blur-sm rounded-[4rem] border border-border/50 shadow-inner">
+              <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-secondary text-primary shadow-lg">
+                <Pencil size={40} />
+              </div>
+              <h2 className="text-3xl font-black tracking-tighter text-foreground mb-4">
+                {validCategory ? `No ${validCategory} posts yet` : 'No posts yet'}
+              </h2>
+              <p className="text-muted-foreground text-xl max-w-sm mb-12 font-medium leading-relaxed">
+                {validCategory
+                  ? `Be the first to post something in the ${category} category for ${hood.name}.`
+                  : `Be the first to share something with the ${hood.name} community.`}
+              </p>
+              <Link href="/feed/new">
+                <Button size="lg" className="rounded-full font-black px-12 py-8 text-xl hover-bounce shadow-xl shadow-primary/20">
+                  Post an update
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
+              {posts.map((post, idx) => (
+                <PostCard key={post.id} post={post} index={idx} />
+              ))}
+            </div>
+          )}
+
+          {posts.length > 0 && (
+            <div className="mt-32 text-center">
+              <Button variant="outline" size="lg" className="rounded-full font-black px-16 py-10 text-2xl border-4 border-primary text-primary hover:bg-secondary transition-all hover:scale-105">
+                Browse older notices
+              </Button>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   )
 }

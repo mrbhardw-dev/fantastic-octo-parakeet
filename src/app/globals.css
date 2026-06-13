@@ -42,6 +42,22 @@
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
+
+  /* Village Noticeboard Tokens */
+  --radius-notice: 3.5rem;
+  --radius-notice-card: 1.5rem;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-bounce-subtle: bounce-subtle 0.4s ease-in-out;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes bounce-subtle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
 }
 
 /* baile.fyi — Irish green community palette */
@@ -149,6 +165,37 @@
   }
 }
 
+@layer components {
+  .hero-pill {
+    @apply rounded-[var(--radius-notice)] bg-secondary border border-primary/10 shadow-xl shadow-primary/5;
+  }
+
+  .floating-notice {
+    @apply bg-white rounded-2xl border border-border shadow-lg transition-transform duration-300 hover:translate-y-[-5px] hover:rotate-0 hover:scale-[1.02]!;
+  }
+
+  .pinned-card {
+    @apply relative bg-white border border-border shadow-sm rounded-[var(--radius-notice-card)] transition-all duration-300;
+  }
+
+  .pin-icon {
+    @apply absolute top-[-10px] left-1/2 -translate-x-1/2 w-5 h-5 bg-red-500 border-2 border-white rounded-full shadow-md z-20;
+  }
+
+  .category-ribbon {
+    @apply absolute top-3 -left-2 px-3 py-1 text-[10px] font-bold uppercase text-white shadow-sm z-10;
+    @apply after:content-[''] after:absolute after:top-full after:left-0 after:border-t-4 after:border-t-black/30 after:border-l-4 after:border-l-transparent;
+  }
+
+  .hover-bounce {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+
+  .blob-bg {
+    @apply fixed z-[-1] filter blur-[80px] opacity-40 pointer-events-none;
+  }
+}
+
 @layer utilities {
   /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
@@ -157,5 +204,13 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
